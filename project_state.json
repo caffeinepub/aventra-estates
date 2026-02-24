@@ -1,0 +1,162 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 5,
+  "summary": "Aventra Estates – a modern, premium real estate website and mobile app (similar to 99acres) with white/gold/black luxury UI. Brand tagline: 'Your Trusted Property Partner'. Built with React/Next.js frontend, Node.js backend, MongoDB database, cloud hosting. Targets Pune localities (Kondhwa, Undri, NIBM, Wanowrie) with plans for India-wide scalability.",
+  "architectural_notes": [
+    "Stack: React/Next.js frontend, Node.js backend, MongoDB database, cloud hosting",
+    "Premium UI theme: white + gold + black color palette with modern animations",
+    "Scalable architecture for future India-wide expansion"
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-apply-a-luxury-premium-visual-theme-throughout-the-entire-application-using-a-white-gold-c9a84c-d4af37-and-black-color-palette-typography-should-use-elegant-serif-sans-serif-pairings-include-smooth-scroll-animations-fade-in-transitions-on-section-entry-and-hover-micro-interactions-on-cards-and-buttons-the-overall-aesthetic-must-match-top-tier-real-estate-platforms-with-a-clean-spacious-layout",
+      "title": "Apply a luxury premium visual theme throughout the entire application using a white, gold (#C9A84C / #D4AF37), and black color palette. Typography should use elegant serif/sans-serif pairings. Include smooth scroll animations, fade-in transitions on section entry, and hover micro-interactions on cards and buttons. The overall aesthetic must match top-tier real estate platforms with a clean, spacious layout.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-homepage-with-1-a-full-viewport-hero-section-featuring-a-looping-background-property-video-with-the-brand-name-aventra-estates-tagline-your-trusted-property-partner-and-a-prominent-post-property-free-cta-button-2-a-search-bar-overlaid-on-the-hero-with-tab-filters-for-buy-rent-sell-a-location-dropdown-pre-populated-with-pune-localities-kondhwa-undri-nibm-wanowrie-baner-kothrud-a-budget-range-selector-and-a-property-type-selector-1bhk-2bhk-3bhk-villa-plot-commercial-3-a-featured-properties-horizontal-scroll-section-4-an-under-construction-projects-section-5-a-luxury-collection-showcase-section-6-a-customer-testimonials-carousel-section",
+      "title": "Build a Homepage with: (1) a full-viewport hero section featuring a looping background property video with the brand name 'Aventra Estates', tagline 'Your Trusted Property Partner', and a prominent 'Post Property Free' CTA button; (2) a search bar overlaid on the hero with tab filters for Buy / Rent / Sell, a location dropdown pre-populated with Pune localities (Kondhwa, Undri, NIBM, Wanowrie, Baner, Kothrud), a budget range selector, and a property type selector (1BHK, 2BHK, 3BHK, Villa, Plot, Commercial); (3) a Featured Properties horizontal scroll section; (4) an Under Construction Projects section; (5) a Luxury Collection showcase section; (6) a Customer Testimonials carousel section.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-property-listing-page-that-displays-properties-in-both-grid-and-list-view-togglable-each-property-card-must-show-a-property-image-price-location-carpet-area-and-built-up-area-amenity-icons-gym-pool-parking-garden-a-contact-agent-button-and-a-whatsapp-button-that-opens-a-whatsapp-chat-link-include-sidebar-filters-for-price-range-property-type-bhk-type-and-location",
+      "title": "Build a Property Listing Page that displays properties in both grid and list view (togglable). Each property card must show: a property image, price, location, carpet area and built-up area, amenity icons (Gym, Pool, Parking, Garden), a 'Contact Agent' button, and a 'WhatsApp' button that opens a WhatsApp chat link. Include sidebar filters for price range, property type, BHK type, and location.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-property-detail-page-with-an-image-gallery-slider-at-the-top-a-video-tour-embed-section-a-full-text-description-a-static-google-maps-placeholder-section-displaying-locality-map-using-an-embedded-iframe-or-static-map-image-an-emi-calculator-widget-inputs-loan-amount-interest-rate-tenure-outputs-monthly-emi-a-loan-assistance-section-with-cta-agent-details-card-with-profile-photo-name-and-contact-options-and-an-enquiry-form-name-phone-email-message-fields",
+      "title": "Build a Property Detail Page with: an image gallery slider at the top; a video tour embed section; a full text description; a static Google Maps placeholder section (displaying locality map using an embedded iframe or static map image); an EMI Calculator widget (inputs: loan amount, interest rate, tenure — outputs monthly EMI); a Loan Assistance section with CTA; agent details card with profile photo, name, and contact options; and an Enquiry Form (name, phone, email, message fields).",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-user-panel-with-a-login-register-page-email-password-authentication-a-user-dashboard-showing-the-user-s-posted-listings-and-received-leads-enquiries-a-post-property-form-multi-step-basic-info-location-details-upload-images-preview-submit-the-ability-to-edit-or-delete-own-listings-and-a-saved-properties-wishlist-page",
+      "title": "Build a User Panel with: a Login/Register page (email + password authentication); a user Dashboard showing the user's posted listings and received leads/enquiries; a Post Property form (multi-step: basic info → location → details → upload images → preview & submit); the ability to edit or delete own listings; and a Saved Properties / Wishlist page.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-an-admin-panel-accessible-only-to-admin-role-users-with-a-listings-management-table-approve-reject-feature-delete-listings-a-user-management-table-view-deactivate-users-a-featured-property-toggle-control-and-a-simple-analytics-dashboard-showing-total-properties-total-users-pending-approvals-and-total-enquiries-as-stat-cards",
+      "title": "Build an Admin Panel accessible only to admin-role users with: a listings management table (approve, reject, feature, delete listings); a user management table (view, deactivate users); a featured property toggle control; and a simple analytics dashboard showing total properties, total users, pending approvals, and total enquiries as stat cards.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-entire-application-is-fully-mobile-responsive-all-pages-homepage-listing-page-detail-page-user-panel-admin-panel-must-render-correctly-and-be-usable-on-screens-from-320px-to-1440px-width-navigation-should-collapse-into-a-mobile-hamburger-menu-on-small-screens",
+      "title": "Ensure the entire application is fully mobile-responsive. All pages — homepage, listing page, detail page, user panel, admin panel — must render correctly and be usable on screens from 320px to 1440px width. Navigation should collapse into a mobile hamburger menu on small screens.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-generate-and-integrate-a-premium-hero-banner-image-and-a-logo-mark-for-aventra-estates-the-logo-should-feature-a-stylized-architectural-icon-or-abstract-estate-emblem-in-gold-on-a-black-or-white-background-the-hero-banner-should-depict-a-luxury-modern-residential-property-exterior-at-golden-hour-suitable-as-a-fallback-when-the-hero-video-is-not-available",
+      "title": "Generate and integrate a premium hero banner image and a logo mark for Aventra Estates. The logo should feature a stylized architectural icon or abstract estate emblem in gold on a black or white background. The hero banner should depict a luxury modern residential property exterior at golden hour, suitable as a fallback when the hero video is not available.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-dedicated-rent-property-category-throughout-the-application-the-search-bar-on-the-homepage-already-has-a-rent-tab-ensure-it-correctly-filters-and-navigates-to-the-property-listing-page-showing-only-rental-listings-add-for-rent-as-a-valid-listing-type-status-in-the-backend-data-model-alongside-existing-statuses-allow-users-to-post-properties-listed-as-for-rent-via-the-post-property-multi-step-form-by-including-a-listing-type-field-buy-rent-display-a-for-rent-badge-on-property-cards-and-detail-pages-for-rental-listings",
+      "title": "Add a dedicated 'Rent' property category throughout the application. The Search Bar on the homepage already has a 'Rent' tab — ensure it correctly filters and navigates to the property listing page showing only rental listings. Add 'For Rent' as a valid listing type/status in the backend data model alongside existing statuses. Allow users to post properties listed as 'For Rent' via the Post Property multi-step form by including a 'Listing Type' field (Buy / Rent). Display a 'For Rent' badge on property cards and detail pages for rental listings.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-all-site-wide-contact-information-to-reflect-the-official-aventra-estates-details-phone-numbers-917020271267-and-919535511171-email-aventraestate-gmail-com-and-office-address-near-goodluck-apartment-kondhwa-pune-411048-this-information-must-appear-in-the-footer-component-and-on-any-contact-about-section-whatsapp-quick-contact-links-should-use-917020271267-as-the-default-number",
+      "title": "Update all site-wide contact information to reflect the official Aventra Estates details: phone numbers +917020271267 and +919535511171, email aventraestate@gmail.com, and office address 'Near Goodluck Apartment, Kondhwa, Pune 411048'. This information must appear in the Footer component and on any Contact / About section. WhatsApp quick-contact links should use +917020271267 as the default number.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Homepage: hero video, search filters (Buy/Sell/Rent, location, budget, property type), featured properties, under construction projects, luxury collection, testimonials, Post Property Free CTA",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Property Listing Page: grid/list view, property cards with image, price, location, area, amenities icons, Contact Agent and WhatsApp buttons",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Property Detail Page: image gallery slider, video tour, full description, Google Map integration, EMI calculator, loan assistance section, agent profile, enquiry form",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "User Panel: login/register, dashboard, post property, upload multiple images & videos, track leads, edit/delete listing",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Admin Panel: approve listings, manage users, featured property control, analytics dashboard",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Mobile App Features: Android & iOS friendly, push notifications, save/wishlist property, direct call & WhatsApp integration, in-app chat system",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "SEO optimization: fast loading, mobile responsive, location-based keyword pages",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Implement backend data models and API endpoints for: Properties (title, description, price, location, property type, BHK type, carpet area, built-up area, amenities, images, status: active/pending/sold, isFeatured, isLuxury, isUnderConstruction); Users (name, email, phone, role: user/admin, wishlist); Enquiries (propertyId, senderName, senderPhone, senderEmail, message, timestamp); Testimonials (author, quote, rating). Provide CRUD operations for all entities.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Add contact information to the site: phone numbers +917020271267 and +919535511171, email aventraestate@gmail.com, office address near Goodluck Apartment, Kondhwa, Pune 411048",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Add Rent Property section/listing support so users can browse and post rental properties",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Aventra Estates",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

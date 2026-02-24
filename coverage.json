@@ -1,0 +1,79 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-24T11:32:56.336Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 2,
+    "implemented": 2,
+    "items": [
+      {
+        "id": "REQ-10",
+        "summary": "Add a dedicated 'Rent' property category throughout the application. The Search Bar on the homepage already has a 'Rent' tab — ensure it correctly filters and navigates to the property listing page showing only rental listings. Add 'For Rent' as a valid listing type/status in the backend data model alongside existing statuses. Allow users to post properties listed as 'For Rent' via the Post Property multi-step form by including a 'Listing Type' field (Buy / Rent). Display a 'For Rent' badge on property cards and detail pages for rental listings.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/SearchBar.tsx",
+          "frontend/src/pages/PostPropertyPage.tsx",
+          "frontend/src/pages/PropertyListingPage.tsx",
+          "frontend/src/components/PropertyListingFilters.tsx",
+          "frontend/src/components/PropertyCard.tsx",
+          "frontend/src/pages/PropertyDetailPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/SearchBar.tsx",
+          "frontend/src/pages/PostPropertyPage.tsx",
+          "frontend/src/pages/PropertyListingPage.tsx",
+          "frontend/src/components/PropertyListingFilters.tsx",
+          "frontend/src/components/PropertyCard.tsx",
+          "frontend/src/pages/PropertyDetailPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-11",
+        "summary": "Update all site-wide contact information to reflect the official Aventra Estates details: phone numbers +917020271267 and +919535511171, email aventraestate@gmail.com, and office address 'Near Goodluck Apartment, Kondhwa, Pune 411048'. This information must appear in the Footer component and on any Contact / About section. WhatsApp quick-contact links should use +917020271267 as the default number.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Footer.tsx",
+          "frontend/src/components/PropertyCard.tsx",
+          "frontend/src/components/AgentCard.tsx",
+          "frontend/src/components/HeroSection.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Footer.tsx",
+          "frontend/src/components/PropertyCard.tsx",
+          "frontend/src/components/AgentCard.tsx"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
+    "build-request.json",
+    "build-template/README.md",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/AgentCard.tsx",
+    "frontend/src/components/FeaturedProperties.tsx",
+    "frontend/src/components/Footer.tsx",
+    "frontend/src/components/PropertyCard.tsx",
+    "frontend/src/components/PropertyListingFilters.tsx",
+    "frontend/src/components/SearchBar.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/pages/PostPropertyPage.tsx",
+    "frontend/src/pages/PropertyDetailPage.tsx",
+    "frontend/src/pages/PropertyListingPage.tsx",
+    "frontend/src/pages/WishlistPage.tsx",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

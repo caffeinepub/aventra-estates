@@ -1,0 +1,54 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-add-a-dedicated-rent-property-category-throughout-the-application-the-search-bar-on-the-homepage-already-has-a-rent-tab-ensure-it-correctly-filters-and-navigates-to-the-property-listing-page-showing-only-rental-listings-add-for-rent-as-a-valid-listing-type-status-in-the-backend-data-model-alongside-existing-statuses-allow-users-to-post-properties-listed-as-for-rent-via-the-post-property-multi-step-form-by-including-a-listing-type-field-buy-rent-display-a-for-rent-badge-on-property-cards-and-detail-pages-for-rental-listings",
+      "featureTitle": "Add a dedicated 'Rent' property category throughout the application. The Search Bar on the homepage already has a 'Rent' tab — ensure it correctly filters and navigates to the property listing page showing only rental listings. Add 'For Rent' as a valid listing type/status in the backend data model alongside existing statuses. Allow users to post properties listed as 'For Rent' via the Post Property multi-step form by including a 'Listing Type' field (Buy / Rent). Display a 'For Rent' badge on property cards and detail pages for rental listings.",
+      "files": [
+        "frontend/src/components/PropertyCard.tsx",
+        "frontend/src/components/PropertyListingFilters.tsx",
+        "frontend/src/components/SearchBar.tsx",
+        "frontend/src/pages/PostPropertyPage.tsx",
+        "frontend/src/pages/PropertyDetailPage.tsx",
+        "frontend/src/pages/PropertyListingPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "user-approval@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-10"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-all-site-wide-contact-information-to-reflect-the-official-aventra-estates-details-phone-numbers-917020271267-and-919535511171-email-aventraestate-gmail-com-and-office-address-near-goodluck-apartment-kondhwa-pune-411048-this-information-must-appear-in-the-footer-component-and-on-any-contact-about-section-whatsapp-quick-contact-links-should-use-917020271267-as-the-default-number",
+      "featureTitle": "Update all site-wide contact information to reflect the official Aventra Estates details: phone numbers +917020271267 and +919535511171, email aventraestate@gmail.com, and office address 'Near Goodluck Apartment, Kondhwa, Pune 411048'. This information must appear in the Footer component and on any Contact / About section. WhatsApp quick-contact links should use +917020271267 as the default number.",
+      "files": [
+        "frontend/src/components/AgentCard.tsx",
+        "frontend/src/components/Footer.tsx",
+        "frontend/src/components/PropertyCard.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "user-approval@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-11"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

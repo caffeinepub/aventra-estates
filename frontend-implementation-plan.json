@@ -1,0 +1,83 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Add Rent Property support and integrate official contact information",
+  "requirements": [
+    {
+      "id": "REQ-10",
+      "summary": "Add dedicated 'Rent' property category with filtering, badges, and listing type selector in Post Property form",
+      "acceptanceCriteria": [
+        "Post Property form includes a Listing Type selector (Buy / Rent) in the Basic Info step",
+        "Searching with the 'Rent' tab on the homepage search bar navigates to the listing page pre-filtered for rental properties",
+        "Property listing page sidebar filters include a 'Listing Type' filter (All / For Sale / For Rent)",
+        "Property cards display a 'For Rent' badge when listingType is 'rent'",
+        "Property detail page shows the listing type prominently (e.g., 'For Rent' label near the price)"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/SearchBar.tsx",
+          "operation": "modify",
+          "description": "Update the 'Rent' tab click handler to navigate to the property listing page with a query parameter that pre-filters for rental properties (listingType=rent). Ensure the Rent tab correctly passes this filter state to the properties route."
+        },
+        {
+          "path": "frontend/src/pages/PostPropertyPage.tsx",
+          "operation": "modify",
+          "description": "Add a 'Listing Type' field in the Basic Info step (step 1) of the multi-step form with radio buttons or a select dropdown for 'For Sale' (maps to backend ListingStatus.active) and 'For Rent' (maps to backend ListingStatus.rent). Update form state and validation to include this field. When submitting, map the selected listing type to the appropriate ListingStatus enum value in the createProperty mutation."
+        },
+        {
+          "path": "frontend/src/pages/PropertyListingPage.tsx",
+          "operation": "modify",
+          "description": "Update the PropertyListingPage component to read the listingType query parameter from the URL (e.g., ?listingType=rent) and apply it as an initial filter state. Filter the properties array client-side to show only properties matching the selected listing type. Ensure the filter persists when users interact with other filters."
+        },
+        {
+          "path": "frontend/src/components/PropertyListingFilters.tsx",
+          "operation": "modify",
+          "description": "Add a 'Listing Type' filter dropdown or radio group with options: All, For Sale, For Rent. When a user selects a listing type, update the parent component's filter state to filter properties where property.status === 'active' (For Sale) or property.status === 'rent' (For Rent). Ensure the filter UI reflects the current selection from URL parameters on page load."
+        },
+        {
+          "path": "frontend/src/components/PropertyCard.tsx",
+          "operation": "modify",
+          "description": "Add conditional rendering to display a 'For Rent' badge when property.status === 'rent'. Position the badge alongside existing badges (Featured, Luxury). Use a distinct color or icon to differentiate rental listings from sale listings."
+        },
+        {
+          "path": "frontend/src/pages/PropertyDetailPage.tsx",
+          "operation": "modify",
+          "description": "Display the listing type prominently near the price section. If property.status === 'rent', show a 'For Rent' label or badge. If property.status === 'active', show 'For Sale'. Use clear typography and positioning to make the listing type immediately visible to users viewing the property details."
+        }
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "summary": "Update all site-wide contact information to official Aventra Estates details: +917020271267, +919535511171, aventraestate@gmail.com, Near Goodluck Apartment Kondhwa Pune 411048",
+      "acceptanceCriteria": [
+        "Footer displays both phone numbers: +917020271267 and +919535511171",
+        "Footer displays email address aventraestate@gmail.com as a clickable mailto link",
+        "Footer displays office address: Near Goodluck Apartment, Kondhwa, Pune 411048",
+        "WhatsApp floating/CTA links use +917020271267 as the default contact number",
+        "Agent card default contact info (if no agent is assigned) falls back to the official contact numbers and email"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Footer.tsx",
+          "operation": "modify",
+          "description": "Replace all existing contact information in the Footer with the official Aventra Estates details. Display both phone numbers (+917020271267 and +919535511171) as clickable tel: links, display the email aventraestate@gmail.com as a clickable mailto: link, and display the full office address 'Near Goodluck Apartment, Kondhwa, Pune 411048'. Ensure the contact section is clearly formatted and accessible."
+        },
+        {
+          "path": "frontend/src/components/PropertyCard.tsx",
+          "operation": "modify",
+          "description": "Update the WhatsApp contact link to use +917020271267 as the default contact number. Ensure the WhatsApp link includes the correct phone number in the format: https://wa.me/917020271267 with an appropriate pre-filled message if applicable."
+        },
+        {
+          "path": "frontend/src/components/AgentCard.tsx",
+          "operation": "modify",
+          "description": "Add fallback logic for when the property owner's profile cannot be fetched or is unavailable. Display the official Aventra Estates contact details as defaults: phone numbers +917020271267 and +919535511171, email aventraestate@gmail.com. Update the call, email, and WhatsApp action buttons to use these fallback values when no agent profile is available."
+        },
+        {
+          "path": "frontend/src/components/HeroSection.tsx",
+          "operation": "modify",
+          "description": "If the HeroSection includes any contact CTAs or floating WhatsApp buttons, update them to use +917020271267 as the primary contact number. Ensure all WhatsApp links follow the format: https://wa.me/917020271267."
+        }
+      ]
+    }
+  ]
+}

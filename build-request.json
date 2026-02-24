@@ -1,0 +1,65 @@
+{
+  "kind": "build_request",
+  "title": "Add Rent Property support and integrate official contact information",
+  "projectName": "Aventra Estates",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-10",
+      "text": "Add a dedicated 'Rent' property category throughout the application. The Search Bar on the homepage already has a 'Rent' tab — ensure it correctly filters and navigates to the property listing page showing only rental listings. Add 'For Rent' as a valid listing type/status in the backend data model alongside existing statuses. Allow users to post properties listed as 'For Rent' via the Post Property multi-step form by including a 'Listing Type' field (Buy / Rent). Display a 'For Rent' badge on property cards and detail pages for rental listings.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Please add rent property"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend Property type includes a listingType field with values: 'sale' | 'rent'",
+        "Post Property form includes a Listing Type selector (Buy / Rent) in the Basic Info step",
+        "Searching with the 'Rent' tab on the homepage search bar navigates to the listing page pre-filtered for rental properties",
+        "Property listing page sidebar filters include a 'Listing Type' filter (All / For Sale / For Rent)",
+        "Property cards display a 'For Rent' badge when listingType is 'rent'",
+        "Property detail page shows the listing type prominently (e.g., 'For Rent' label near the price)"
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "text": "Update all site-wide contact information to reflect the official Aventra Estates details: phone numbers +917020271267 and +919535511171, email aventraestate@gmail.com, and office address 'Near Goodluck Apartment, Kondhwa, Pune 411048'. This information must appear in the Footer component and on any Contact / About section. WhatsApp quick-contact links should use +917020271267 as the default number.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Contact number +917020271267 +919535511171",
+          "Gmail - aventraestate@gmail.com",
+          "Office address near goodluck apartment kondhwa pune 411048"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Footer displays both phone numbers: +917020271267 and +919535511171",
+        "Footer displays email address aventraestate@gmail.com as a clickable mailto link",
+        "Footer displays office address: Near Goodluck Apartment, Kondhwa, Pune 411048",
+        "WhatsApp floating/CTA links use +917020271267 as the default contact number",
+        "Agent card default contact info (if no agent is assigned) falls back to the official contact numbers and email"
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not break existing property listing, filtering, or admin approval flows",
+    "Immutable frontend paths (hooks, main.tsx, ui components) must not be modified",
+    "All contact details must match exactly: +917020271267, +919535511171, aventraestate@gmail.com, Near Goodluck Apartment Kondhwa Pune 411048"
+  ],
+  "nonGoals": [
+    "Building a separate standalone Rent page — rental listings should be handled within the existing Property Listing Page via filters",
+    "Adding new authentication or user role changes",
+    "Modifying the admin panel approval workflow"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}
