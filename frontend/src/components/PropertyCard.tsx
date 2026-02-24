@@ -1,15 +1,15 @@
-import { useState } from 'react';
-import { Heart, MapPin, Maximize2, BedDouble, MessageCircle } from 'lucide-react';
+import { Property } from '@/backend';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Property, ListingStatus } from '@/backend';
+import { MapPin, BedDouble, Maximize2, Heart, MessageCircle } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
+import { useAddToWishlist, useRemoveFromWishlist } from '@/hooks/useQueries';
 
 interface PropertyCardProps {
   property: Property;
+  showWishlist?: boolean;
   isWishlisted?: boolean;
   onWishlistToggle?: (id: bigint) => void;
-  showWishlist?: boolean;
 }
 
 const BHK_LABELS: Record<string, string> = {
@@ -20,153 +20,103 @@ const BHK_LABELS: Record<string, string> = {
   bhk5plus: '5+ BHK',
 };
 
-const PROPERTY_TYPE_LABELS: Record<string, string> = {
-  apartment: 'Apartment',
-  villa: 'Villa',
-  rowHouse: 'Row House',
-  plot: 'Plot',
-  commercial: 'Commercial',
-};
+const PLACEHOLDER = '/assets/generated/luxury-interior.dim_800x600.png';
 
-function formatPrice(price: bigint): string {
-  const num = Number(price);
-  if (num >= 10000000) return `₹${(num / 10000000).toFixed(2)} Cr`;
-  if (num >= 100000) return `₹${(num / 100000).toFixed(2)} L`;
-  return `₹${num.toLocaleString('en-IN')}`;
-}
-
-export default function PropertyCard({
-  property,
-  isWishlisted = false,
-  onWishlistToggle,
-  showWishlist = false,
-}: PropertyCardProps) {
+export default function PropertyCard({ property, showWishlist = false, isWishlisted = false, onWishlistToggle }: PropertyCardProps) {
   const navigate = useNavigate();
-  const [imgError, setImgError] = useState(false);
+  const addToWishlist = useAddToWishlist();
+  const removeFromWishlist = useRemoveFromWishlist();
 
-  const imageUrl =
-    !imgError && property.images && property.images.length > 0
-      ? property.images[0].getDirectURL()
-      : null;
+  // Use ExternalBlob images, fallback to placeholder
+  const imageUrl = property.images && property.images.length > 0
+    ? property.images[0].getDirectURL()
+    : PLACEHOLDER;
 
-  const isRent = property.status === ListingStatus.rent;
-  const whatsappNumber = '917020271267';
-  const whatsappMessage = encodeURIComponent(
-    `Hi, I'm interested in the property: ${property.title} (ID: ${property.id}). Please share more details.`
-  );
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
+  const handleWishlist = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onWishlistToggle) {
+      onWishlistToggle(property.id);
+    } else if (isWishlisted) {
+      removeFromWishlist.mutate(property.id);
+    } else {
+      addToWishlist.mutate(property.id);
+    }
+  };
+
+  const handleWhatsApp = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const msg = encodeURIComponent(`Hi, I'm interested in the property: ${property.title} (${property.location})`);
+    window.open(`https://wa.me/917020271267?text=${msg}`, '_blank');
+  };
+
+  const formatPrice = (price: bigint) => {
+    const n = Number(price);
+    if (n >= 10000000) return `₹${(n / 10000000).toFixed(2)} Cr`;
+    if (n >= 100000) return `₹${(n / 100000).toFixed(2)} L`;
+    return `₹${n.toLocaleString('en-IN')}`;
+  };
 
   return (
     <div
-      className="group bg-card rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 cursor-pointer border border-border/50"
-      onClick={() => navigate({ to: `/properties/${property.id}` })}
+      className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
+      onClick={() => navigate({ to: '/properties/$id', params: { id: property.id.toString() } })}
     >
       {/* Image */}
-      <div className="relative h-52 bg-muted overflow-hidden">
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={property.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            onError={() => setImgError(true)}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-muted">
-            <img
-              src="/assets/generated/luxury-interior.dim_800x600.png"
-              alt="Property"
-              className="w-full h-full object-cover opacity-60"
-            />
-          </div>
-        )}
-
+      <div className="relative h-52 overflow-hidden">
+        <img
+          src={imageUrl}
+          alt={property.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          onError={(e) => { (e.target as HTMLImageElement).src = PLACEHOLDER; }}
+        />
         {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-          {property.isFeatured && (
-            <Badge className="bg-accent text-accent-foreground text-xs font-semibold px-2 py-0.5">
-              Featured
-            </Badge>
-          )}
-          {property.isLuxury && (
-            <Badge className="bg-secondary text-secondary-foreground text-xs font-semibold px-2 py-0.5">
-              Luxury
-            </Badge>
-          )}
-          {isRent && (
-            <Badge className="bg-emerald-600 text-white text-xs font-semibold px-2 py-0.5">
-              For Rent
-            </Badge>
-          )}
-          {property.isUnderConstruction && (
-            <Badge variant="outline" className="bg-background/80 text-xs font-semibold px-2 py-0.5">
-              Under Construction
-            </Badge>
-          )}
+        <div className="absolute top-3 left-3 flex flex-wrap gap-1">
+          {property.isFeatured && <Badge className="bg-primary text-primary-foreground text-xs">Featured</Badge>}
+          {property.isLuxury && <Badge className="bg-amber-500 text-white text-xs">Luxury</Badge>}
+          {property.status === 'rent' && <Badge variant="secondary" className="text-xs">For Rent</Badge>}
+          {property.isUnderConstruction && <Badge variant="outline" className="bg-card text-xs">Under Construction</Badge>}
         </div>
-
         {/* Wishlist */}
-        {showWishlist && onWishlistToggle && (
+        {showWishlist && (
           <button
-            className="absolute top-3 right-3 p-1.5 rounded-full bg-background/80 hover:bg-background transition-colors"
-            onClick={(e) => {
-              e.stopPropagation();
-              onWishlistToggle(property.id);
-            }}
+            onClick={handleWishlist}
+            className="absolute top-3 right-3 bg-card/80 backdrop-blur-sm rounded-full p-1.5 hover:bg-card transition-colors"
           >
-            <Heart
-              className={`h-4 w-4 transition-colors ${isWishlisted ? 'fill-destructive text-destructive' : 'text-muted-foreground'}`}
-            />
+            <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-destructive text-destructive' : 'text-muted-foreground'}`} />
           </button>
         )}
-
-        {/* Price */}
-        <div className="absolute bottom-3 right-3">
-          <span className="bg-primary text-primary-foreground text-sm font-bold px-3 py-1 rounded-lg shadow">
-            {formatPrice(property.price)}
-            {isRent && <span className="text-xs font-normal opacity-80">/mo</span>}
-          </span>
-        </div>
       </div>
 
       {/* Content */}
       <div className="p-4">
-        <div className="flex items-start justify-between gap-2 mb-1">
-          <h3 className="font-semibold text-card-foreground text-base leading-snug line-clamp-1 group-hover:text-primary transition-colors">
-            {property.title}
-          </h3>
-          <span className="text-xs text-muted-foreground shrink-0 bg-muted px-2 py-0.5 rounded-full">
-            {PROPERTY_TYPE_LABELS[property.propertyType] || property.propertyType}
-          </span>
-        </div>
-
+        <h3 className="font-semibold text-foreground text-base line-clamp-1 mb-1">{property.title}</h3>
         <div className="flex items-center gap-1 text-muted-foreground text-sm mb-3">
-          <MapPin className="h-3.5 w-3.5 shrink-0" />
+          <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
           <span className="line-clamp-1">{property.location}</span>
         </div>
 
-        <div className="flex items-center gap-3 text-sm text-muted-foreground border-t border-border/50 pt-3">
-          <div className="flex items-center gap-1">
-            <BedDouble className="h-3.5 w-3.5" />
-            <span>{BHK_LABELS[property.bhkType] || property.bhkType}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Maximize2 className="h-3.5 w-3.5" />
-            <span>{Number(property.carpetArea)} sq.ft</span>
-          </div>
-          <div className="ml-auto">
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-7 px-2 text-xs text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
-              onClick={(e) => {
-                e.stopPropagation();
-                window.open(whatsappUrl, '_blank');
-              }}
-            >
-              <MessageCircle className="h-3.5 w-3.5 mr-1" />
-              WhatsApp
-            </Button>
-          </div>
+        <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3">
+          <span className="flex items-center gap-1">
+            <BedDouble className="w-3.5 h-3.5" />
+            {BHK_LABELS[property.bhkType] || property.bhkType}
+          </span>
+          <span className="flex items-center gap-1">
+            <Maximize2 className="w-3.5 h-3.5" />
+            {property.carpetArea.toString()} sq ft
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <span className="text-lg font-bold text-primary">{formatPrice(property.price)}</span>
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-xs gap-1"
+            onClick={handleWhatsApp}
+          >
+            <MessageCircle className="w-3.5 h-3.5" />
+            Enquire
+          </Button>
         </div>
       </div>
     </div>

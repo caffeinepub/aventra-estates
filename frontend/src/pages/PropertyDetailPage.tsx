@@ -1,394 +1,224 @@
-import { useState } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
-import {
-  MapPin,
-  Maximize2,
-  BedDouble,
-  ChevronLeft,
-  ChevronRight,
-  Tag,
-  Home,
-  Loader2,
-  Send,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Skeleton } from '@/components/ui/skeleton';
-import AgentCard from '@/components/AgentCard';
 import { useGetProperty, useGetUserProfile, useCreateEnquiry } from '@/hooks/useQueries';
-import { ListingStatus } from '@/backend';
-import { toast } from 'sonner';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { MapPin, BedDouble, Maximize2, Car, Wind, CheckCircle, ArrowLeft } from 'lucide-react';
+import ImageGallerySlider from '@/components/ImageGallerySlider';
+import AgentCard from '@/components/AgentCard';
+import { Amenity } from '@/backend';
 
-const AMENITY_LABELS: Record<string, string> = {
-  parking: 'Parking',
-  gym: 'Gym',
-  swimmingPool: 'Swimming Pool',
-  garden: 'Garden',
-  security: '24/7 Security',
-  playground: 'Playground',
+const BHK_LABELS: Record<string, string> = {
+  bhk1: '1 BHK', bhk2: '2 BHK', bhk3: '3 BHK', bhk4: '4 BHK', bhk5plus: '5+ BHK',
 };
 
 const PROPERTY_TYPE_LABELS: Record<string, string> = {
-  apartment: 'Apartment',
-  villa: 'Villa',
-  rowHouse: 'Row House',
-  plot: 'Plot',
-  commercial: 'Commercial',
+  apartment: 'Apartment', villa: 'Villa', rowHouse: 'Row House', plot: 'Plot', commercial: 'Commercial',
 };
 
-const BHK_LABELS: Record<string, string> = {
-  bhk1: '1 BHK',
-  bhk2: '2 BHK',
-  bhk3: '3 BHK',
-  bhk4: '4 BHK',
-  bhk5plus: '5+ BHK',
+const AMENITY_LABELS: Record<string, string> = {
+  gym: 'Gym', swimmingPool: 'Swimming Pool', balcony: 'Balcony', club: 'Club House',
+  lift: 'Lift', garden: 'Garden', security: '24/7 Security', powerBackup: 'Power Backup',
+  playground: 'Playground', parking: 'Parking', gardenArea: 'Garden Area',
 };
 
-function formatPrice(price: bigint): string {
-  const num = Number(price);
-  if (num >= 10000000) return `₹${(num / 10000000).toFixed(2)} Cr`;
-  if (num >= 100000) return `₹${(num / 100000).toFixed(2)} L`;
-  return `₹${num.toLocaleString('en-IN')}`;
-}
+const formatPrice = (price: bigint) => {
+  const n = Number(price);
+  if (n >= 10000000) return `₹${(n / 10000000).toFixed(2)} Cr`;
+  if (n >= 100000) return `₹${(n / 100000).toFixed(2)} L`;
+  return `₹${n.toLocaleString('en-IN')}`;
+};
 
 export default function PropertyDetailPage() {
-  const { propertyId } = useParams({ strict: false }) as { propertyId: string };
+  // Route is /properties/$id — param name is "id"
+  const { id } = useParams({ from: '/properties/$id' });
   const navigate = useNavigate();
-  const [imgIndex, setImgIndex] = useState(0);
-  const [enquiryForm, setEnquiryForm] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    message: '',
-  });
-
-  const { data: property, isLoading: propLoading } = useGetProperty(BigInt(propertyId || '0'));
-  const { data: ownerProfile, isLoading: ownerLoading } = useGetUserProfile(
-    property?.owner ?? null
-  );
+  const { data: property, isLoading } = useGetProperty(BigInt(id));
+  // owner can be undefined before property loads; useGetUserProfile accepts null | undefined
+  const { data: ownerProfile, isLoading: profileLoading } = useGetUserProfile(property?.owner ?? null);
   const createEnquiry = useCreateEnquiry();
 
-  const isRent = property?.status === ListingStatus.rent;
+  const [enquiryForm, setEnquiryForm] = useState({ name: '', phone: '', email: '', message: '' });
+  const [enquirySent, setEnquirySent] = useState(false);
 
-  const handleEnquirySubmit = async (e: React.FormEvent) => {
+  const handleEnquiry = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!property) return;
-    try {
-      await createEnquiry.mutateAsync({
-        propertyId: property.id,
-        senderName: enquiryForm.name,
-        senderPhone: enquiryForm.phone,
-        senderEmail: enquiryForm.email,
-        message: enquiryForm.message,
-        timestamp: BigInt(Date.now()),
-      });
-      toast.success('Enquiry sent successfully!');
-      setEnquiryForm({ name: '', phone: '', email: '', message: '' });
-    } catch {
-      toast.error('Failed to send enquiry. Please try again.');
-    }
+    await createEnquiry.mutateAsync({
+      propertyId: property.id,
+      senderName: enquiryForm.name,
+      senderPhone: enquiryForm.phone,
+      senderEmail: enquiryForm.email,
+      message: enquiryForm.message,
+      timestamp: BigInt(Date.now()),
+    });
+    setEnquirySent(true);
   };
 
-  if (propLoading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8">
-          <Skeleton className="h-8 w-48 mb-6" />
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-4">
-              <Skeleton className="h-80 w-full rounded-xl" />
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-              <Skeleton className="h-32 w-full" />
-            </div>
-            <div className="space-y-4">
-              <Skeleton className="h-48 w-full rounded-xl" />
-              <Skeleton className="h-64 w-full rounded-xl" />
-            </div>
-          </div>
-        </div>
+      <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+        <Skeleton className="h-96 w-full rounded-2xl" />
+        <Skeleton className="h-8 w-2/3" />
+        <Skeleton className="h-4 w-1/3" />
       </div>
     );
   }
 
   if (!property) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <Home className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Property Not Found</h2>
-          <Button onClick={() => navigate({ to: '/properties' })}>Browse Properties</Button>
-        </div>
+      <div className="max-w-5xl mx-auto px-4 py-16 text-center">
+        <p className="text-muted-foreground text-lg">Property not found.</p>
+        <Button className="mt-4" onClick={() => navigate({ to: '/properties' })}>Browse Properties</Button>
       </div>
     );
   }
 
-  const images = property.images || [];
-  const hasImages = images.length > 0;
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* Breadcrumb */}
-      <div className="bg-primary text-primary-foreground py-4">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center gap-2 text-primary-foreground/70 text-sm">
-            <button onClick={() => navigate({ to: '/' })} className="hover:text-primary-foreground transition-colors">
-              Home
-            </button>
-            <span>/</span>
-            <button onClick={() => navigate({ to: '/properties' })} className="hover:text-primary-foreground transition-colors">
-              Properties
-            </button>
-            <span>/</span>
-            <span className="text-primary-foreground line-clamp-1">{property.title}</span>
+    <div className="max-w-5xl mx-auto px-4 py-8">
+      {/* Back */}
+      <button
+        onClick={() => navigate({ to: '/properties' })}
+        className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
+      >
+        <ArrowLeft className="w-4 h-4" /> Back to listings
+      </button>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left: Gallery + Details */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Gallery - uses ExternalBlob images only */}
+          <ImageGallerySlider images={property.images || []} title={property.title} />
+
+          {/* Title & Badges */}
+          <div>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {property.isFeatured && <Badge className="bg-primary text-primary-foreground">Featured</Badge>}
+              {property.isLuxury && <Badge className="bg-amber-500 text-white">Luxury</Badge>}
+              {property.status === 'rent' && <Badge variant="secondary">For Rent</Badge>}
+              {property.isUnderConstruction && <Badge variant="outline">Under Construction</Badge>}
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">{property.title}</h1>
+            <div className="flex items-center gap-1 text-muted-foreground">
+              <MapPin className="w-4 h-4" />
+              <span>{property.location}</span>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Image Gallery */}
-            <div className="relative rounded-xl overflow-hidden bg-muted h-80 sm:h-96">
-              {hasImages ? (
-                <>
-                  <img
-                    src={images[imgIndex].getDirectURL()}
-                    alt={property.title}
-                    className="w-full h-full object-cover"
-                  />
-                  {images.length > 1 && (
-                    <>
-                      <button
-                        onClick={() => setImgIndex((i) => (i - 1 + images.length) % images.length)}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 hover:bg-background transition-colors"
-                      >
-                        <ChevronLeft className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={() => setImgIndex((i) => (i + 1) % images.length)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 hover:bg-background transition-colors"
-                      >
-                        <ChevronRight className="h-5 w-5" />
-                      </button>
-                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                        {images.map((_, i) => (
-                          <button
-                            key={i}
-                            onClick={() => setImgIndex(i)}
-                            className={`h-1.5 rounded-full transition-all ${i === imgIndex ? 'w-4 bg-white' : 'w-1.5 bg-white/60'}`}
-                          />
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </>
-              ) : (
-                <img
-                  src="/assets/generated/luxury-interior.dim_800x600.png"
-                  alt="Property"
-                  className="w-full h-full object-cover opacity-70"
-                />
-              )}
+          {/* Price */}
+          <div className="bg-primary/10 rounded-xl p-4">
+            <p className="text-sm text-muted-foreground mb-1">Price</p>
+            <p className="text-3xl font-bold text-primary">{formatPrice(property.price)}</p>
+          </div>
+
+          {/* Key Details */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="bg-muted/40 rounded-xl p-3 text-center">
+              <BedDouble className="w-5 h-5 mx-auto text-primary mb-1" />
+              <p className="text-xs text-muted-foreground">BHK</p>
+              <p className="font-semibold text-sm">{BHK_LABELS[property.bhkType] || property.bhkType}</p>
             </div>
+            <div className="bg-muted/40 rounded-xl p-3 text-center">
+              <Maximize2 className="w-5 h-5 mx-auto text-primary mb-1" />
+              <p className="text-xs text-muted-foreground">Carpet Area</p>
+              <p className="font-semibold text-sm">{property.carpetArea.toString()} sq ft</p>
+            </div>
+            <div className="bg-muted/40 rounded-xl p-3 text-center">
+              <Wind className="w-5 h-5 mx-auto text-primary mb-1" />
+              <p className="text-xs text-muted-foreground">Balcony</p>
+              <p className="font-semibold text-sm">{property.hasBalcony ? 'Yes' : 'No'}</p>
+            </div>
+            <div className="bg-muted/40 rounded-xl p-3 text-center">
+              <Car className="w-5 h-5 mx-auto text-primary mb-1" />
+              <p className="text-xs text-muted-foreground">Parking</p>
+              <p className="font-semibold text-sm">{property.parkingSpaces.toString()} spots</p>
+            </div>
+          </div>
 
-            {/* Title & Price */}
+          {/* Description */}
+          {property.description && (
             <div>
-              <div className="flex flex-wrap items-start justify-between gap-3 mb-2">
-                <h1 className="text-2xl sm:text-3xl font-bold text-foreground leading-tight">
-                  {property.title}
-                </h1>
-                <div className="flex flex-col items-end gap-1">
-                  <span className="text-2xl font-bold text-primary">
-                    {formatPrice(property.price)}
-                    {isRent && <span className="text-base font-normal text-muted-foreground">/mo</span>}
-                  </span>
-                  {/* Listing Type Badge */}
-                  <Badge
-                    className={
-                      isRent
-                        ? 'bg-emerald-600 text-white text-xs'
-                        : 'bg-primary text-primary-foreground text-xs'
-                    }
-                  >
-                    <Tag className="h-3 w-3 mr-1" />
-                    {isRent ? 'For Rent' : 'For Sale'}
-                  </Badge>
-                </div>
-              </div>
+              <h2 className="text-lg font-semibold text-foreground mb-2">About this property</h2>
+              <p className="text-muted-foreground leading-relaxed">{property.description}</p>
+            </div>
+          )}
 
-              <div className="flex items-center gap-1.5 text-muted-foreground mb-3">
-                <MapPin className="h-4 w-4 shrink-0" />
-                <span>{property.location}</span>
+          {/* Property Info */}
+          <div>
+            <h2 className="text-lg font-semibold text-foreground mb-3">Property Details</h2>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="flex justify-between bg-muted/30 rounded-lg px-3 py-2">
+                <span className="text-muted-foreground">Type</span>
+                <span className="font-medium">{PROPERTY_TYPE_LABELS[property.propertyType] || property.propertyType}</span>
               </div>
-
-              {/* Badges */}
-              <div className="flex flex-wrap gap-2">
-                {property.isFeatured && (
-                  <Badge className="bg-accent text-accent-foreground">Featured</Badge>
-                )}
-                {property.isLuxury && (
-                  <Badge className="bg-secondary text-secondary-foreground">Luxury</Badge>
-                )}
-                {property.isUnderConstruction && (
-                  <Badge variant="outline">Under Construction</Badge>
-                )}
-                <Badge variant="outline">
-                  {PROPERTY_TYPE_LABELS[property.propertyType] || property.propertyType}
-                </Badge>
-                <Badge variant="outline">
-                  {BHK_LABELS[property.bhkType] || property.bhkType}
-                </Badge>
+              <div className="flex justify-between bg-muted/30 rounded-lg px-3 py-2">
+                <span className="text-muted-foreground">Built-up Area</span>
+                <span className="font-medium">{property.builtUpArea.toString()} sq ft</span>
               </div>
             </div>
+          </div>
 
-            {/* Key Details */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              <div className="bg-card border border-border rounded-lg p-4 text-center">
-                <BedDouble className="h-5 w-5 text-primary mx-auto mb-1" />
-                <p className="text-xs text-muted-foreground">BHK</p>
-                <p className="font-semibold text-sm">{BHK_LABELS[property.bhkType]}</p>
-              </div>
-              <div className="bg-card border border-border rounded-lg p-4 text-center">
-                <Maximize2 className="h-5 w-5 text-primary mx-auto mb-1" />
-                <p className="text-xs text-muted-foreground">Carpet Area</p>
-                <p className="font-semibold text-sm">{Number(property.carpetArea)} sq.ft</p>
-              </div>
-              <div className="bg-card border border-border rounded-lg p-4 text-center">
-                <Maximize2 className="h-5 w-5 text-primary mx-auto mb-1" />
-                <p className="text-xs text-muted-foreground">Built-up Area</p>
-                <p className="font-semibold text-sm">{Number(property.builtUpArea)} sq.ft</p>
+          {/* Amenities */}
+          {property.amenities && property.amenities.length > 0 && (
+            <div>
+              <h2 className="text-lg font-semibold text-foreground mb-3">Amenities</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {property.amenities.map((amenity: Amenity) => (
+                  <div key={amenity} className="flex items-center gap-2 bg-muted/30 rounded-lg px-3 py-2 text-sm">
+                    <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                    <span>{AMENITY_LABELS[amenity] || amenity}</span>
+                  </div>
+                ))}
               </div>
             </div>
+          )}
+        </div>
 
-            {/* Description */}
-            {property.description && (
-              <div className="bg-card border border-border rounded-xl p-5">
-                <h2 className="font-semibold text-foreground mb-3">About This Property</h2>
-                <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-line">
-                  {property.description}
-                </p>
+        {/* Right: Agent + Enquiry */}
+        <div className="space-y-6">
+          <AgentCard
+            name={ownerProfile?.name}
+            email={ownerProfile?.email}
+            phone={ownerProfile?.phone}
+            isLoading={profileLoading}
+          />
+
+          {/* Enquiry Form */}
+          <div className="bg-card border border-border rounded-2xl p-5">
+            <h3 className="font-semibold text-foreground mb-4">Send Enquiry</h3>
+            {enquirySent ? (
+              <div className="text-center py-4">
+                <CheckCircle className="w-10 h-10 text-primary mx-auto mb-2" />
+                <p className="font-medium text-foreground">Enquiry Sent!</p>
+                <p className="text-sm text-muted-foreground mt-1">We'll get back to you shortly.</p>
               </div>
-            )}
-
-            {/* Amenities */}
-            {property.amenities && property.amenities.length > 0 && (
-              <div className="bg-card border border-border rounded-xl p-5">
-                <h2 className="font-semibold text-foreground mb-3">Amenities</h2>
-                <div className="flex flex-wrap gap-2">
-                  {property.amenities.map((amenity) => (
-                    <Badge key={amenity} variant="outline" className="text-sm">
-                      {AMENITY_LABELS[amenity] || amenity}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Enquiry Form */}
-            <div className="bg-card border border-border rounded-xl p-5">
-              <h2 className="font-semibold text-foreground mb-4">Send Enquiry</h2>
-              <form onSubmit={handleEnquirySubmit} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="enq-name" className="text-sm mb-1.5 block">
-                      Your Name *
-                    </Label>
-                    <Input
-                      id="enq-name"
-                      placeholder="Full name"
-                      value={enquiryForm.name}
-                      onChange={(e) => setEnquiryForm((f) => ({ ...f, name: e.target.value }))}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="enq-phone" className="text-sm mb-1.5 block">
-                      Phone *
-                    </Label>
-                    <Input
-                      id="enq-phone"
-                      placeholder="+91 XXXXX XXXXX"
-                      value={enquiryForm.phone}
-                      onChange={(e) => setEnquiryForm((f) => ({ ...f, phone: e.target.value }))}
-                      required
-                    />
-                  </div>
+            ) : (
+              <form onSubmit={handleEnquiry} className="space-y-3">
+                <div>
+                  <Label htmlFor="enq-name">Name</Label>
+                  <Input id="enq-name" className="mt-1" value={enquiryForm.name} onChange={e => setEnquiryForm(f => ({ ...f, name: e.target.value }))} required />
                 </div>
                 <div>
-                  <Label htmlFor="enq-email" className="text-sm mb-1.5 block">
-                    Email
-                  </Label>
-                  <Input
-                    id="enq-email"
-                    type="email"
-                    placeholder="your@email.com"
-                    value={enquiryForm.email}
-                    onChange={(e) => setEnquiryForm((f) => ({ ...f, email: e.target.value }))}
-                  />
+                  <Label htmlFor="enq-phone">Phone</Label>
+                  <Input id="enq-phone" className="mt-1" value={enquiryForm.phone} onChange={e => setEnquiryForm(f => ({ ...f, phone: e.target.value }))} required />
                 </div>
                 <div>
-                  <Label htmlFor="enq-message" className="text-sm mb-1.5 block">
-                    Message
-                  </Label>
-                  <Textarea
-                    id="enq-message"
-                    placeholder="I'm interested in this property..."
-                    value={enquiryForm.message}
-                    onChange={(e) => setEnquiryForm((f) => ({ ...f, message: e.target.value }))}
-                    rows={3}
-                  />
+                  <Label htmlFor="enq-email">Email</Label>
+                  <Input id="enq-email" className="mt-1" type="email" value={enquiryForm.email} onChange={e => setEnquiryForm(f => ({ ...f, email: e.target.value }))} required />
                 </div>
-                <Button type="submit" disabled={createEnquiry.isPending} className="w-full gap-2">
-                  {createEnquiry.isPending ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="h-4 w-4" />
-                      Send Enquiry
-                    </>
-                  )}
+                <div>
+                  <Label htmlFor="enq-message">Message</Label>
+                  <Textarea id="enq-message" className="mt-1" rows={3} value={enquiryForm.message} onChange={e => setEnquiryForm(f => ({ ...f, message: e.target.value }))} required />
+                </div>
+                <Button type="submit" className="w-full" disabled={createEnquiry.isPending}>
+                  {createEnquiry.isPending ? 'Sending...' : 'Send Enquiry'}
                 </Button>
               </form>
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-5">
-            {/* Price Card */}
-            <div className="bg-card border border-border rounded-xl p-5">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-2xl font-bold text-primary">
-                  {formatPrice(property.price)}
-                  {isRent && <span className="text-sm font-normal text-muted-foreground">/mo</span>}
-                </span>
-                <Badge
-                  className={
-                    isRent
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-primary text-primary-foreground'
-                  }
-                >
-                  {isRent ? 'For Rent' : 'For Sale'}
-                </Badge>
-              </div>
-              <p className="text-sm text-muted-foreground">{property.location}</p>
-            </div>
-
-            {/* Agent Card */}
-            <AgentCard
-              name={ownerProfile?.name}
-              email={ownerProfile?.email}
-              phone={ownerProfile?.phone}
-              isLoading={ownerLoading}
-            />
+            )}
           </div>
         </div>
       </div>

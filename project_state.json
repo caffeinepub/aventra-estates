@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 5,
+  "projectStateVersion": 9,
   "summary": "Aventra Estates – a modern, premium real estate website and mobile app (similar to 99acres) with white/gold/black luxury UI. Brand tagline: 'Your Trusted Property Partner'. Built with React/Next.js frontend, Node.js backend, MongoDB database, cloud hosting. Targets Pune localities (Kondhwa, Undri, NIBM, Wanowrie) with plans for India-wide scalability.",
   "architectural_notes": [
     "Stack: React/Next.js frontend, Node.js backend, MongoDB database, cloud hosting",
@@ -89,6 +89,70 @@
         "REQ-11"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-update-the-multi-step-post-property-form-postpropertypage-to-include-input-fields-for-multiple-photo-url-entries-or-an-image-upload-list-a-has-balcony-toggle-checkbox-a-car-parking-spots-number-input-and-a-multi-select-or-checkbox-list-for-amenities-gym-pool-parking-garden-balcony-lift-security-clubhouse-power-backup-these-fields-should-appear-in-the-appropriate-step-of-the-multi-step-form-and-be-submitted-with-the-property-data-also-update-the-editpropertypage-to-include-the-same-new-fields-pre-populated-from-existing-property-data",
+      "title": "Update the multi-step Post Property form (PostPropertyPage) to include input fields for: multiple photo URL entries or an image upload list, a 'Has Balcony' toggle/checkbox, a 'Car Parking Spots' number input, and a multi-select or checkbox list for amenities (Gym, Pool, Parking, Garden, Balcony, Lift, Security, Clubhouse, Power Backup). These fields should appear in the appropriate step of the multi-step form and be submitted with the property data. Also update the EditPropertyPage to include the same new fields, pre-populated from existing property data.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-propertycard-and-propertylistingpage-to-display-the-new-property-fields-show-up-to-4-property-photos-in-the-card-image-area-at-least-the-primary-first-photo-and-show-amenity-icons-for-all-relevant-amenities-gym-pool-parking-garden-balcony-lift-etc-present-on-the-property-display-a-balcony-icon-badge-and-a-car-parking-n-indicator-on-each-property-card-where-applicable",
+      "title": "Update PropertyCard and PropertyListingPage to display the new property fields: show up to 4 property photos in the card image area (at least the primary/first photo), and show amenity icons for all relevant amenities (Gym, Pool, Parking, Garden, Balcony, Lift, etc.) present on the property. Display a 'Balcony' icon/badge and a 'Car Parking: N' indicator on each property card where applicable.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-property-detail-page-propertydetailpage-to-display-the-full-photo-gallery-using-the-photos-array-in-the-imagegalleryslider-show-all-amenities-as-a-visually-styled-grid-of-icon-label-pairs-display-balcony-availability-and-number-of-car-parking-spots-in-the-property-features-section",
+      "title": "Update the Property Detail Page (PropertyDetailPage) to display the full photo gallery using the photos array in the ImageGallerySlider. Show all amenities as a visually styled grid of icon+label pairs. Display balcony availability and number of car parking spots in the property features section.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-admin-listings-page-adminlistingspage-to-clearly-show-the-approval-workflow-display-a-pending-approval-tab-or-filter-to-surface-newly-submitted-properties-awaiting-review-each-pending-property-row-must-have-approve-and-reject-action-buttons-that-call-the-updatepropertystatus-backend-method-display-the-current-status-pending-active-rejected-as-a-color-coded-badge-on-each-row",
+      "title": "Update the Admin Listings Page (AdminListingsPage) to clearly show the approval workflow: display a 'Pending Approval' tab or filter to surface newly submitted properties awaiting review. Each pending property row must have 'Approve' and 'Reject' action buttons that call the updatePropertyStatus backend method. Display the current status (Pending, Active, Rejected) as a color-coded badge on each row.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-user-dashboard-userdashboard-to-show-the-approval-status-of-each-of-the-user-s-submitted-properties-display-a-status-badge-pending-approval-active-rejected-next-to-each-listing-so-the-user-knows-whether-their-property-is-live-or-awaiting-review",
+      "title": "Update the User Dashboard (UserDashboard) to show the approval status of each of the user's submitted properties. Display a status badge (Pending Approval, Active, Rejected) next to each listing so the user knows whether their property is live or awaiting review.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-postpropertypage-features-photos-step-remove-all-photo-url-text-input-fields-and-replace-them-with-a-file-upload-input-that-accepts-jpeg-image-files-accept-image-jpeg-image-jpg-allow-uploading-multiple-files-read-uploaded-files-as-binary-data-e-g-via-filereader-as-arraybuffer-or-base64-and-store-them-in-component-state-for-submission-display-thumbnail-previews-of-selected-images-before-submission",
+      "title": "In PostPropertyPage (Features & Photos step), remove all photo URL text input fields and replace them with a file upload input that accepts JPEG image files (accept='image/jpeg,image/jpg'). Allow uploading multiple files. Read uploaded files as binary data (e.g., via FileReader as ArrayBuffer or base64) and store them in component state for submission. Display thumbnail previews of selected images before submission.",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-editpropertypage-remove-all-photo-url-text-input-fields-and-replace-them-with-a-jpeg-file-upload-input-accept-image-jpeg-image-jpg-pre-populate-the-photo-preview-area-with-existing-photos-from-the-property-data-allow-the-user-to-upload-new-jpeg-files-to-replace-or-add-to-existing-photos-display-thumbnail-previews-of-both-existing-and-newly-selected-photos",
+      "title": "In EditPropertyPage, remove all photo URL text input fields and replace them with a JPEG file upload input (accept='image/jpeg,image/jpg'). Pre-populate the photo preview area with existing photos from the property data. Allow the user to upload new JPEG files to replace or add to existing photos. Display thumbnail previews of both existing and newly selected photos.",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-propertycard-propertylistingpage-propertydetailpage-imagegalleryslider-and-any-other-component-that-renders-property-photos-to-handle-the-new-blob-base64-photo-format-convert-stored-photo-blob-data-to-object-urls-or-base64-data-uris-for-rendering-in-img-tags-ensure-backward-compatibility-where-no-photos-exist-show-a-placeholder-image",
+      "title": "Update PropertyCard, PropertyListingPage, PropertyDetailPage (ImageGallerySlider), and any other component that renders property photos to handle the new blob/base64 photo format. Convert stored photo blob data to object URLs or base64 data URIs for rendering in <img> tags. Ensure backward compatibility where no photos exist (show a placeholder image).",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -152,6 +216,48 @@
       "id": "AR-14",
       "summary": "Add Rent Property section/listing support so users can browse and post rental properties",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Add photos, balcony, car parking, and amenities details to property listings and cards",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Property submission approval workflow: submitted properties require admin approval before going live",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Extend the backend Property data model to include: a 'photos' field (array of image URLs), a 'hasBalcony' boolean field, a 'carParking' field (number of car parking spots), and an expanded 'amenities' field that supports a structured list including Gym, Pool, Parking, Garden, Balcony, Lift, Security, Clubhouse, and Power Backup. Update all relevant backend CRUD methods (createProperty, updateProperty, getProperties, getPropertyById) to handle these new fields.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Implement a property submission approval workflow in the backend. When a user submits a new property via createProperty, its status must default to 'pending' (awaiting admin review). Add or confirm an admin-only updatePropertyStatus method that allows admins to approve (set status to 'active') or reject (set status to 'rejected') a pending property. Only properties with 'active' status should appear in public-facing queries (getProperties, getFeaturedProperties, etc.).",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "Replace photo URL input fields with actual JPEG/image file upload inputs for property photos",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-20",
+      "summary": "Update the backend Property data model to store photos as base64-encoded JPEG blobs (or stable binary blobs) instead of URL strings. Change the 'photos' field type from [Text] to [Blob] or a record containing filename and blob data. Update createProperty, updateProperty, and getPropertyById to accept and return photo blob data accordingly.",
+      "reqIds": [
+        "REQ-19"
+      ],
       "status": "pending"
     }
   ],

@@ -1,50 +1,64 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-24T11:32:56.336Z",
+  "generatedAt": "2026-02-24T12:29:07.895Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 2,
+    "total": 4,
+    "implemented": 3,
     "items": [
       {
-        "id": "REQ-10",
-        "summary": "Add a dedicated 'Rent' property category throughout the application. The Search Bar on the homepage already has a 'Rent' tab — ensure it correctly filters and navigates to the property listing page showing only rental listings. Add 'For Rent' as a valid listing type/status in the backend data model alongside existing statuses. Allow users to post properties listed as 'For Rent' via the Post Property multi-step form by including a 'Listing Type' field (Buy / Rent). Display a 'For Rent' badge on property cards and detail pages for rental listings.",
+        "id": "REQ-19",
+        "summary": "Update the backend Property data model to store photos as base64-encoded JPEG blobs (or stable binary blobs) instead of URL strings. Change the 'photos' field type from [Text] to [Blob] or a record containing filename and blob data. Update createProperty, updateProperty, and getPropertyById to accept and return photo blob data accordingly.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-20",
+        "summary": "In PostPropertyPage (Features & Photos step), remove all photo URL text input fields and replace them with a file upload input that accepts JPEG image files (accept='image/jpeg,image/jpg'). Allow uploading multiple files. Read uploaded files as binary data (e.g., via FileReader as ArrayBuffer or base64) and store them in component state for submission. Display thumbnail previews of selected images before submission.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/SearchBar.tsx",
-          "frontend/src/pages/PostPropertyPage.tsx",
-          "frontend/src/pages/PropertyListingPage.tsx",
-          "frontend/src/components/PropertyListingFilters.tsx",
-          "frontend/src/components/PropertyCard.tsx",
-          "frontend/src/pages/PropertyDetailPage.tsx"
+          "frontend/src/pages/PostPropertyPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/SearchBar.tsx",
-          "frontend/src/pages/PostPropertyPage.tsx",
-          "frontend/src/pages/PropertyListingPage.tsx",
-          "frontend/src/components/PropertyListingFilters.tsx",
-          "frontend/src/components/PropertyCard.tsx",
-          "frontend/src/pages/PropertyDetailPage.tsx"
+          "frontend/src/pages/PostPropertyPage.tsx"
         ]
       },
       {
-        "id": "REQ-11",
-        "summary": "Update all site-wide contact information to reflect the official Aventra Estates details: phone numbers +917020271267 and +919535511171, email aventraestate@gmail.com, and office address 'Near Goodluck Apartment, Kondhwa, Pune 411048'. This information must appear in the Footer component and on any Contact / About section. WhatsApp quick-contact links should use +917020271267 as the default number.",
+        "id": "REQ-21",
+        "summary": "In EditPropertyPage, remove all photo URL text input fields and replace them with a JPEG file upload input (accept='image/jpeg,image/jpg'). Pre-populate the photo preview area with existing photos from the property data. Allow the user to upload new JPEG files to replace or add to existing photos. Display thumbnail previews of both existing and newly selected photos.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/Footer.tsx",
-          "frontend/src/components/PropertyCard.tsx",
-          "frontend/src/components/AgentCard.tsx",
-          "frontend/src/components/HeroSection.tsx"
+          "frontend/src/pages/EditPropertyPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/Footer.tsx",
+          "frontend/src/pages/EditPropertyPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-22",
+        "summary": "Update PropertyCard, PropertyListingPage, PropertyDetailPage (ImageGallerySlider), and any other component that renders property photos to handle the new blob/base64 photo format. Convert stored photo blob data to object URLs or base64 data URIs for rendering in <img> tags. Ensure backward compatibility where no photos exist (show a placeholder image).",
+        "status": "implemented",
+        "plannedFiles": [
           "frontend/src/components/PropertyCard.tsx",
-          "frontend/src/components/AgentCard.tsx"
+          "frontend/src/components/ImageGallerySlider.tsx",
+          "frontend/src/pages/PropertyDetailPage.tsx",
+          "frontend/src/pages/PropertyListingPage.tsx",
+          "frontend/src/components/FeaturedProperties.tsx",
+          "frontend/src/components/LuxuryCollection.tsx",
+          "frontend/src/components/UnderConstructionProjects.tsx",
+          "frontend/src/pages/UserDashboard.tsx",
+          "frontend/src/pages/AdminListingsPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/PropertyCard.tsx",
+          "frontend/src/components/ImageGallerySlider.tsx",
+          "frontend/src/pages/PropertyDetailPage.tsx",
+          "frontend/src/pages/UserDashboard.tsx"
         ]
       }
     ]
@@ -53,24 +67,20 @@
     "backend/main.mo",
     "backend/migration.mo",
     "build-request.json",
-    "build-template/README.md",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
-    "frontend/src/components/AgentCard.tsx",
-    "frontend/src/components/FeaturedProperties.tsx",
-    "frontend/src/components/Footer.tsx",
+    "frontend/src/components/ImageGallerySlider.tsx",
     "frontend/src/components/PropertyCard.tsx",
-    "frontend/src/components/PropertyListingFilters.tsx",
-    "frontend/src/components/SearchBar.tsx",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/EditPropertyPage.tsx",
     "frontend/src/pages/PostPropertyPage.tsx",
     "frontend/src/pages/PropertyDetailPage.tsx",
-    "frontend/src/pages/PropertyListingPage.tsx",
-    "frontend/src/pages/WishlistPage.tsx",
+    "frontend/src/pages/UserDashboard.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -9,6 +9,7 @@ import Array "mo:core/Array";
 import Order "mo:core/Order";
 import Text "mo:core/Text";
 import Nat "mo:core/Nat";
+import Blob "mo:core/Blob";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
 import Migration "migration";
@@ -26,7 +27,8 @@ actor {
     #active;
     #pending;
     #sold;
-    #rent; // Add rent as valid status
+    #rent;
+    #rejected;
   };
 
   public type Amenity = {
@@ -36,6 +38,11 @@ actor {
     #garden;
     #security;
     #playground;
+    #gardenArea;
+    #balcony;
+    #lift;
+    #club;
+    #powerBackup;
   };
 
   public type PropertyType = {
@@ -67,10 +74,13 @@ actor {
     builtUpArea : Nat;
     amenities : [Amenity];
     images : [Storage.ExternalBlob];
-    status : ListingStatus; // Includes for sale, sold, and rent now
+    status : ListingStatus;
     isFeatured : Bool;
     isLuxury : Bool;
     isUnderConstruction : Bool;
+    photos : [Blob];
+    hasBalcony : Bool;
+    parkingSpaces : Nat;
   };
 
   public type User = {
@@ -251,30 +261,54 @@ actor {
 
   // === Property CRUD ===
 
+  // Public: anyone can view a property, but only active ones are visible to non-admins/non-owners
   public query ({ caller }) func getProperty(id : Nat) : async Property {
     switch (properties.get(id)) {
-      case (?p) { return p };
+      case (?p) {
+        // Admins can see any property; owners can see their own; everyone else only sees active
+        if (p.status == #active) {
+          return p;
+        } else if (AccessControl.isAdmin(accessControlState, caller)) {
+          return p;
+        } else if (AccessControl.hasPermission(accessControlState, caller, #user) and p.owner == caller) {
+          return p;
+        } else {
+          Runtime.trap("Property not found or not available");
+        };
+      };
       case (null) {
         Runtime.trap("Property does not exist");
       };
     };
   };
 
+  // Public: returns only active properties
   public query ({ caller }) func getProperties() : async [Property] {
-    properties.values().toArray();
-  };
-
-  public query ({ caller }) func getFeaturedProperties() : async [Property] {
     properties.values().toArray().filter(
-      func(p) { p.isFeatured }
+      func(p) { p.status == #active }
     );
   };
 
-  // New query for all for rent listings
+  // Public: returns only active featured properties
+  public query ({ caller }) func getFeaturedProperties() : async [Property] {
+    properties.values().toArray().filter(
+      func(p) { p.isFeatured and p.status == #active }
+    );
+  };
+
+  // Public: returns only active for-rent listings
   public query ({ caller }) func getForRentProperties() : async [Property] {
     properties.values().toArray().filter(
       func(p) { p.status == #rent }
     );
+  };
+
+  // Admin-only: returns all properties regardless of status
+  public query ({ caller }) func getAllPropertiesAdmin() : async [Property] {
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can view all properties");
+    };
+    properties.values().toArray();
   };
 
   public shared ({ caller }) func createProperty(property : {
@@ -286,10 +320,14 @@ actor {
     bhkType : BhkType;
     carpetArea : Nat;
     builtUpArea : Nat;
-    status : ListingStatus;
     isFeatured : Bool;
     isLuxury : Bool;
     isUnderConstruction : Bool;
+    photos : [Blob];
+    hasBalcony : Bool;
+    parkingSpaces : Nat;
+    amenities : [Amenity];
+    images : [Storage.ExternalBlob];
   }) : async Nat {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can create properties");
@@ -306,12 +344,15 @@ actor {
       bhkType = property.bhkType;
       carpetArea = property.carpetArea;
       builtUpArea = property.builtUpArea;
-      amenities = [];
-      images = [];
-      status = property.status;
-      isFeatured = property.isFeatured;
+      amenities = property.amenities;
+      images = property.images;
+      status = #pending; // Always pending on creation, awaiting admin approval
+      isFeatured = false; // isFeatured can only be set by admin
       isLuxury = property.isLuxury;
       isUnderConstruction = property.isUnderConstruction;
+      photos = property.photos;
+      hasBalcony = property.hasBalcony;
+      parkingSpaces = property.parkingSpaces;
     };
     properties.add(propertyIdCounter, newProperty);
     propertyIdCounter;
@@ -326,9 +367,13 @@ actor {
     bhkType : BhkType;
     carpetArea : Nat;
     builtUpArea : Nat;
-    status : ListingStatus;
     isLuxury : Bool;
     isUnderConstruction : Bool;
+    photos : [Blob];
+    hasBalcony : Bool;
+    parkingSpaces : Nat;
+    amenities : [Amenity];
+    images : [Storage.ExternalBlob];
   }) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can update properties");
@@ -350,12 +395,15 @@ actor {
           bhkType = update.bhkType;
           carpetArea = update.carpetArea;
           builtUpArea = update.builtUpArea;
-          amenities = currentProperty.amenities;
-          images = currentProperty.images;
-          status = update.status;
+          amenities = update.amenities;
+          images = update.images;
+          status = #pending; // Reset to pending after update, requires re-approval
           isFeatured = currentProperty.isFeatured;
           isLuxury = update.isLuxury;
           isUnderConstruction = update.isUnderConstruction;
+          photos = update.photos;
+          hasBalcony = update.hasBalcony;
+          parkingSpaces = update.parkingSpaces;
         };
         properties.add(propertyId, updatedProperty);
       };
@@ -377,7 +425,41 @@ actor {
     };
   };
 
-  // Admin-only: approve/reject/feature a listing
+  // Admin-only: approve/reject/feature a listing (updatePropertyStatus)
+  public shared ({ caller }) func updatePropertyStatus(propertyId : Nat, status : ListingStatus) : async () {
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can update property status");
+    };
+    switch (properties.get(propertyId)) {
+      case (null) { Runtime.trap("Property does not exist") };
+      case (?currentProperty) {
+        let updatedProperty = {
+          id = currentProperty.id;
+          owner = currentProperty.owner;
+          title = currentProperty.title;
+          description = currentProperty.description;
+          price = currentProperty.price;
+          location = currentProperty.location;
+          propertyType = currentProperty.propertyType;
+          bhkType = currentProperty.bhkType;
+          carpetArea = currentProperty.carpetArea;
+          builtUpArea = currentProperty.builtUpArea;
+          amenities = currentProperty.amenities;
+          images = currentProperty.images;
+          status;
+          isFeatured = currentProperty.isFeatured;
+          isLuxury = currentProperty.isLuxury;
+          isUnderConstruction = currentProperty.isUnderConstruction;
+          photos = currentProperty.photos;
+          hasBalcony = currentProperty.hasBalcony;
+          parkingSpaces = currentProperty.parkingSpaces;
+        };
+        properties.add(propertyId, updatedProperty);
+      };
+    };
+  };
+
+  // Admin-only: set property status (alias kept for compatibility)
   public shared ({ caller }) func setPropertyStatus(propertyId : Nat, status : ListingStatus) : async () {
     if (not (AccessControl.isAdmin(accessControlState, caller))) {
       Runtime.trap("Unauthorized: Only admins can set property status");
@@ -402,6 +484,9 @@ actor {
           isFeatured = currentProperty.isFeatured;
           isLuxury = currentProperty.isLuxury;
           isUnderConstruction = currentProperty.isUnderConstruction;
+          photos = currentProperty.photos;
+          hasBalcony = currentProperty.hasBalcony;
+          parkingSpaces = currentProperty.parkingSpaces;
         };
         properties.add(propertyId, updatedProperty);
       };
@@ -433,6 +518,9 @@ actor {
           isFeatured;
           isLuxury = currentProperty.isLuxury;
           isUnderConstruction = currentProperty.isUnderConstruction;
+          photos = currentProperty.photos;
+          hasBalcony = currentProperty.hasBalcony;
+          parkingSpaces = currentProperty.parkingSpaces;
         };
         properties.add(propertyId, updatedProperty);
       };
@@ -469,6 +557,9 @@ actor {
           isFeatured = currentProperty.isFeatured;
           isLuxury = currentProperty.isLuxury;
           isUnderConstruction = currentProperty.isUnderConstruction;
+          photos = currentProperty.photos;
+          hasBalcony = currentProperty.hasBalcony;
+          parkingSpaces = currentProperty.parkingSpaces;
         };
         properties.add(propertyId, updatedProperty);
       };
@@ -653,7 +744,7 @@ actor {
     });
   };
 
-  // === Sorting / Filtering (public) ===
+  // === Sorting / Filtering (public, active only) ===
 
   module PropertyModule {
     public func compareByPrice(a : Property, b : Property) : Order.Order {
@@ -661,8 +752,11 @@ actor {
     };
   };
 
+  // Public: returns only active properties sorted by price
   public query ({ caller }) func getSortedPropertiesByPrice(_ascending : Bool) : async [Property] {
-    properties.values().toArray().sort(PropertyModule.compareByPrice);
+    properties.values().toArray().filter(
+      func(p) { p.status == #active }
+    ).sort(PropertyModule.compareByPrice);
   };
 
   module PropertyLocation {
@@ -671,11 +765,14 @@ actor {
     };
   };
 
+  // Public: returns only active properties sorted by location
   public query ({ caller }) func getSortedPropertiesByLocation() : async [Property] {
-    properties.values().toArray().sort(PropertyLocation.compareByLocation);
+    properties.values().toArray().filter(
+      func(p) { p.status == #active }
+    ).sort(PropertyLocation.compareByLocation);
   };
 
-  // Get own listings (authenticated users)
+  // Get own listings (authenticated users) — returns all statuses for the owner
   public query ({ caller }) func getMyProperties() : async [Property] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can view their own listings");

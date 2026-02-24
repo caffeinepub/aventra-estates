@@ -1,81 +1,98 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add Rent Property support and integrate official contact information",
+  "title": "Replace photo URL inputs with JPEG file upload inputs for property photos",
   "requirements": [
     {
-      "id": "REQ-10",
-      "summary": "Add dedicated 'Rent' property category with filtering, badges, and listing type selector in Post Property form",
+      "id": "REQ-20",
+      "summary": "Replace photo URL text inputs with JPEG file upload input in PostPropertyPage",
       "acceptanceCriteria": [
-        "Post Property form includes a Listing Type selector (Buy / Rent) in the Basic Info step",
-        "Searching with the 'Rent' tab on the homepage search bar navigates to the listing page pre-filtered for rental properties",
-        "Property listing page sidebar filters include a 'Listing Type' filter (All / For Sale / For Rent)",
-        "Property cards display a 'For Rent' badge when listingType is 'rent'",
-        "Property detail page shows the listing type prominently (e.g., 'For Rent' label near the price)"
+        "No photo URL text input fields exist in PostPropertyPage",
+        "A file input with accept='image/jpeg,image/jpg' is present in the Features & Photos step",
+        "Multiple JPEG files can be selected at once",
+        "Thumbnail previews of selected photos are shown before submission",
+        "Selected photo data is submitted with the property form data"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/SearchBar.tsx",
-          "operation": "modify",
-          "description": "Update the 'Rent' tab click handler to navigate to the property listing page with a query parameter that pre-filters for rental properties (listingType=rent). Ensure the Rent tab correctly passes this filter state to the properties route."
-        },
-        {
           "path": "frontend/src/pages/PostPropertyPage.tsx",
           "operation": "modify",
-          "description": "Add a 'Listing Type' field in the Basic Info step (step 1) of the multi-step form with radio buttons or a select dropdown for 'For Sale' (maps to backend ListingStatus.active) and 'For Rent' (maps to backend ListingStatus.rent). Update form state and validation to include this field. When submitting, map the selected listing type to the appropriate ListingStatus enum value in the createProperty mutation."
-        },
-        {
-          "path": "frontend/src/pages/PropertyListingPage.tsx",
-          "operation": "modify",
-          "description": "Update the PropertyListingPage component to read the listingType query parameter from the URL (e.g., ?listingType=rent) and apply it as an initial filter state. Filter the properties array client-side to show only properties matching the selected listing type. Ensure the filter persists when users interact with other filters."
-        },
-        {
-          "path": "frontend/src/components/PropertyListingFilters.tsx",
-          "operation": "modify",
-          "description": "Add a 'Listing Type' filter dropdown or radio group with options: All, For Sale, For Rent. When a user selects a listing type, update the parent component's filter state to filter properties where property.status === 'active' (For Sale) or property.status === 'rent' (For Rent). Ensure the filter UI reflects the current selection from URL parameters on page load."
-        },
-        {
-          "path": "frontend/src/components/PropertyCard.tsx",
-          "operation": "modify",
-          "description": "Add conditional rendering to display a 'For Rent' badge when property.status === 'rent'. Position the badge alongside existing badges (Featured, Luxury). Use a distinct color or icon to differentiate rental listings from sale listings."
-        },
-        {
-          "path": "frontend/src/pages/PropertyDetailPage.tsx",
-          "operation": "modify",
-          "description": "Display the listing type prominently near the price section. If property.status === 'rent', show a 'For Rent' label or badge. If property.status === 'active', show 'For Sale'. Use clear typography and positioning to make the listing type immediately visible to users viewing the property details."
+          "description": "In the Features & Photos step (step 2), remove all photo URL text input fields and their state management. Replace with a file input that accepts JPEG/JPG files (accept='image/jpeg,image/jpg') with multiple selection enabled. Add state to track selected File objects. Implement FileReader logic to convert selected files to ExternalBlob instances using ExternalBlob.fromBytes(). Display thumbnail previews of selected images using object URLs or the ExternalBlob.getDirectURL() method. Update the form submission logic to pass the ExternalBlob array to the images field instead of URL strings in the photos field. Verify the blob-storage component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-11",
-      "summary": "Update all site-wide contact information to official Aventra Estates details: +917020271267, +919535511171, aventraestate@gmail.com, Near Goodluck Apartment Kondhwa Pune 411048",
+      "id": "REQ-21",
+      "summary": "Replace photo URL inputs with JPEG file upload in EditPropertyPage",
       "acceptanceCriteria": [
-        "Footer displays both phone numbers: +917020271267 and +919535511171",
-        "Footer displays email address aventraestate@gmail.com as a clickable mailto link",
-        "Footer displays office address: Near Goodluck Apartment, Kondhwa, Pune 411048",
-        "WhatsApp floating/CTA links use +917020271267 as the default contact number",
-        "Agent card default contact info (if no agent is assigned) falls back to the official contact numbers and email"
+        "No photo URL text input fields exist in EditPropertyPage",
+        "A JPEG file upload input is present",
+        "Existing property photos are shown as thumbnails when the edit form loads",
+        "New JPEG files can be selected and previewed before saving",
+        "Updated photo data is submitted correctly on form save"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/Footer.tsx",
+          "path": "frontend/src/pages/EditPropertyPage.tsx",
           "operation": "modify",
-          "description": "Replace all existing contact information in the Footer with the official Aventra Estates details. Display both phone numbers (+917020271267 and +919535511171) as clickable tel: links, display the email aventraestate@gmail.com as a clickable mailto: link, and display the full office address 'Near Goodluck Apartment, Kondhwa, Pune 411048'. Ensure the contact section is clearly formatted and accessible."
-        },
+          "description": "Remove all photo URL text input fields. Add a JPEG file input (accept='image/jpeg,image/jpg') with multiple selection. Pre-populate the photo preview area by converting existing property.images ExternalBlob instances to display URLs using getDirectURL(). Add state to track newly selected File objects separately from existing images. Implement FileReader to convert new uploads to ExternalBlob instances. Display thumbnail previews for both existing and newly selected photos with remove buttons. On form submission, combine existing ExternalBlob instances (not removed) with newly uploaded ExternalBlob instances and pass them to the images field. Verify the blob-storage component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-22",
+      "summary": "Update property display components to render JPEG photos from blob data",
+      "acceptanceCriteria": [
+        "PropertyCard renders uploaded JPEG photos correctly using blob/base64 data",
+        "ImageGallerySlider on PropertyDetailPage renders all uploaded JPEG photos",
+        "No broken image icons appear for properties with uploaded photos",
+        "Properties without any photos show a fallback placeholder image"
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/components/PropertyCard.tsx",
           "operation": "modify",
-          "description": "Update the WhatsApp contact link to use +917020271267 as the default contact number. Ensure the WhatsApp link includes the correct phone number in the format: https://wa.me/917020271267 with an appropriate pre-filled message if applicable."
+          "description": "Update the component to render property photos from the images field (ExternalBlob[]) instead of the photos field (Text[]). For the primary property image, use property.images[0]?.getDirectURL() if available, otherwise fall back to a placeholder image. Ensure the image src attribute uses the direct URL for browser caching and streaming."
         },
         {
-          "path": "frontend/src/components/AgentCard.tsx",
+          "path": "frontend/src/components/ImageGallerySlider.tsx",
           "operation": "modify",
-          "description": "Add fallback logic for when the property owner's profile cannot be fetched or is unavailable. Display the official Aventra Estates contact details as defaults: phone numbers +917020271267 and +919535511171, email aventraestate@gmail.com. Update the call, email, and WhatsApp action buttons to use these fallback values when no agent profile is available."
+          "description": "Update the component to accept and render ExternalBlob[] instead of URL strings. Map over the images array and call getDirectURL() on each ExternalBlob instance to generate src URLs for the main gallery images and thumbnails. Ensure backward compatibility by showing a placeholder image if the images array is empty."
         },
         {
-          "path": "frontend/src/components/HeroSection.tsx",
+          "path": "frontend/src/pages/PropertyDetailPage.tsx",
           "operation": "modify",
-          "description": "If the HeroSection includes any contact CTAs or floating WhatsApp buttons, update them to use +917020271267 as the primary contact number. Ensure all WhatsApp links follow the format: https://wa.me/917020271267."
+          "description": "Update the ImageGallerySlider integration to pass property.images (ExternalBlob[]) instead of property.photos (Text[]). Ensure the component correctly handles the new blob-based image format."
+        },
+        {
+          "path": "frontend/src/pages/PropertyListingPage.tsx",
+          "operation": "modify",
+          "description": "Verify PropertyCard receives the full property object including the images field. No changes needed if PropertyCard is already receiving the complete property data."
+        },
+        {
+          "path": "frontend/src/components/FeaturedProperties.tsx",
+          "operation": "modify",
+          "description": "Verify PropertyCard receives the full property object including the images field. No changes needed if PropertyCard is already receiving the complete property data."
+        },
+        {
+          "path": "frontend/src/components/LuxuryCollection.tsx",
+          "operation": "modify",
+          "description": "Update property image rendering to use property.images[0]?.getDirectURL() instead of property.photos[0] for the luxury property cards. Add a fallback to the luxury-interior asset if no images exist: frontend/public/assets/generated/luxury-interior.dim_800x600.png."
+        },
+        {
+          "path": "frontend/src/components/UnderConstructionProjects.tsx",
+          "operation": "modify",
+          "description": "Update property image rendering to use property.images[0]?.getDirectURL() instead of property.photos[0] for under-construction property cards. Add a fallback placeholder image if no images exist."
+        },
+        {
+          "path": "frontend/src/pages/UserDashboard.tsx",
+          "operation": "modify",
+          "description": "Update property thumbnail rendering in the user's property list to use property.images[0]?.getDirectURL() instead of property.photos[0]. Add a fallback placeholder for properties without images."
+        },
+        {
+          "path": "frontend/src/pages/AdminListingsPage.tsx",
+          "operation": "modify",
+          "description": "Update property thumbnail rendering in the admin listings table to use property.images[0]?.getDirectURL() instead of property.photos[0]. Add a fallback placeholder for properties without images."
         }
       ]
     }

@@ -1,35 +1,52 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-24T11:32:56.332Z",
-  "summary": "The diff implements the vast majority of REQ-10 and REQ-11 requirements. Backend gains a 'rent' ListingStatus, frontend adds listing type filters, badges, search bar navigation, post-property form field, footer contact details, agent card fallbacks, and WhatsApp links. One minor gap exists: the backend uses a 'rent' status on the existing ListingStatus enum rather than a separate 'listingType' field with 'sale'|'rent' values as specified in the AC. All REQ-11 contact details are correctly implemented.",
+  "generatedAt": "2026-02-24T12:29:07.891Z",
+  "summary": "The diff implements most of the required changes. The backend Property model is updated from [Text] to [Blob] for photos, a migration.mo is included, and frontend pages (PostPropertyPage, EditPropertyPage) replace URL text inputs with JPEG file upload inputs. PropertyCard and ImageGallerySlider are updated. However, the new photos Blob field is never rendered as data URIs in PropertyCard or ImageGallerySlider - these components still only use ExternalBlob images. Additionally, the uploaded JPEG files appear to be submitted as ExternalBlob to the images field rather than as Uint8Array to the photos field.",
   "missing_requirements": [
     {
-      "id": "REQ-10",
-      "requirement": "Backend Property type includes a listingType field with values: 'sale' | 'rent'",
-      "reason": "The backend adds '#rent' as a new variant to the existing ListingStatus enum (alongside #active, #pending, #sold) rather than introducing a dedicated separate 'listingType' field with values 'sale' | 'rent' as specified in the acceptance criteria. The Property type in main.mo does not have a standalone listingType field.",
+      "id": "REQ-22",
+      "requirement": "PropertyCard, PropertyDetailPage (ImageGallerySlider), and other components must render the new blob/base64 photos field (property.photos: Blob[]/Uint8Array[]) as data URIs or object URLs in img tags.",
+      "reason": "PropertyCard uses only property.images[0].getDirectURL() (ExternalBlob) and does not attempt to render property.photos (the new Blob[] field). ImageGallerySlider accepts only ExternalBlob[] and is called with property.images, not property.photos. The new photos Blob field is never converted to a data URI and rendered anywhere in the UI.",
       "evidence": [
-        "backend/main.mo",
-        "backend/migration.mo"
+        "frontend/src/components/PropertyCard.tsx",
+        "frontend/src/components/ImageGallerySlider.tsx",
+        "frontend/src/pages/PropertyDetailPage.tsx",
+        "frontend-file-summaries.txt"
+      ]
+    },
+    {
+      "id": "REQ-20",
+      "requirement": "Selected photo data (JPEG file binary) must be submitted with the property form data via the photos field as blob/binary data to the backend createProperty call.",
+      "reason": "In PostPropertyPage, uploaded files are converted to ExternalBlob instances and passed as the images field, not as Uint8Array[] to the photos: [Blob] field. The new backend photos field does not appear to receive the uploaded JPEG binary data.",
+      "evidence": [
+        "frontend/src/pages/PostPropertyPage.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ]
+    },
+    {
+      "id": "REQ-21",
+      "requirement": "Updated photo data must be submitted correctly to the backend updateProperty via the photos field as blob/binary data.",
+      "reason": "EditPropertyPage similarly converts uploaded files to ExternalBlob for the images field rather than passing Uint8Array[] to the photos field in the update payload.",
+      "evidence": [
+        "frontend/src/pages/EditPropertyPage.tsx",
+        "frontend/src/hooks/useQueries.ts"
       ]
     }
   ],
   "hallucinated_features": [],
-  "confidence": 0.82,
+  "confidence": 0.8,
   "changed_files": [
     "backend/main.mo",
     "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/AgentCard.tsx",
-    "frontend/src/components/FeaturedProperties.tsx",
-    "frontend/src/components/Footer.tsx",
+    "frontend/src/components/ImageGallerySlider.tsx",
     "frontend/src/components/PropertyCard.tsx",
-    "frontend/src/components/PropertyListingFilters.tsx",
-    "frontend/src/components/SearchBar.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/EditPropertyPage.tsx",
     "frontend/src/pages/PostPropertyPage.tsx",
     "frontend/src/pages/PropertyDetailPage.tsx",
-    "frontend/src/pages/PropertyListingPage.tsx",
-    "frontend/src/pages/WishlistPage.tsx",
+    "frontend/src/pages/UserDashboard.tsx",
     "project_state.json"
   ]
 }

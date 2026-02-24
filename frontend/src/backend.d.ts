@@ -53,17 +53,25 @@ export interface Property {
     amenities: Array<Amenity>;
     isUnderConstruction: boolean;
     isFeatured: boolean;
+    hasBalcony: boolean;
     price: bigint;
     location: string;
+    parkingSpaces: bigint;
+    photos: Array<Uint8Array>;
     images: Array<ExternalBlob>;
 }
 export enum Amenity {
     gym = "gym",
     swimmingPool = "swimmingPool",
+    balcony = "balcony",
+    club = "club",
+    lift = "lift",
     garden = "garden",
     security = "security",
+    powerBackup = "powerBackup",
     playground = "playground",
-    parking = "parking"
+    parking = "parking",
+    gardenArea = "gardenArea"
 }
 export enum ApprovalStatus {
     pending = "pending",
@@ -81,7 +89,8 @@ export enum ListingStatus {
     active = "active",
     pending = "pending",
     rent = "rent",
-    sold = "sold"
+    sold = "sold",
+    rejected = "rejected"
 }
 export enum PropertyType {
     commercial = "commercial",
@@ -113,7 +122,6 @@ export interface backendInterface {
         senderEmail: string;
     }): Promise<bigint>;
     createProperty(property: {
-        status: ListingStatus;
         title: string;
         propertyType: PropertyType;
         isLuxury: boolean;
@@ -121,10 +129,15 @@ export interface backendInterface {
         bhkType: BhkType;
         builtUpArea: bigint;
         description: string;
+        amenities: Array<Amenity>;
         isUnderConstruction: boolean;
         isFeatured: boolean;
+        hasBalcony: boolean;
         price: bigint;
         location: string;
+        parkingSpaces: bigint;
+        photos: Array<Uint8Array>;
+        images: Array<ExternalBlob>;
     }): Promise<bigint>;
     createTestimonial(testimonial: {
         quote: string;
@@ -132,6 +145,7 @@ export interface backendInterface {
         rating: bigint;
     }): Promise<bigint>;
     deleteProperty(propertyId: bigint): Promise<void>;
+    getAllPropertiesAdmin(): Promise<Array<Property>>;
     getAllUsers(): Promise<Array<{
         principal: Principal;
         name: string;
@@ -176,7 +190,6 @@ export interface backendInterface {
     setPropertyFeatured(propertyId: bigint, isFeatured: boolean): Promise<void>;
     setPropertyStatus(propertyId: bigint, status: ListingStatus): Promise<void>;
     updateProperty(propertyId: bigint, update: {
-        status: ListingStatus;
         title: string;
         propertyType: PropertyType;
         isLuxury: boolean;
@@ -184,8 +197,14 @@ export interface backendInterface {
         bhkType: BhkType;
         builtUpArea: bigint;
         description: string;
+        amenities: Array<Amenity>;
         isUnderConstruction: boolean;
+        hasBalcony: boolean;
         price: bigint;
         location: string;
+        parkingSpaces: bigint;
+        photos: Array<Uint8Array>;
+        images: Array<ExternalBlob>;
     }): Promise<void>;
+    updatePropertyStatus(propertyId: bigint, status: ListingStatus): Promise<void>;
 }

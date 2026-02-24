@@ -135,8 +135,11 @@ export interface Property {
     amenities: Array<Amenity>;
     isUnderConstruction: boolean;
     isFeatured: boolean;
+    hasBalcony: boolean;
     price: bigint;
     location: string;
+    parkingSpaces: bigint;
+    photos: Array<Uint8Array>;
     images: Array<ExternalBlob>;
 }
 export interface _CaffeineStorageRefillResult {
@@ -146,10 +149,15 @@ export interface _CaffeineStorageRefillResult {
 export enum Amenity {
     gym = "gym",
     swimmingPool = "swimmingPool",
+    balcony = "balcony",
+    club = "club",
+    lift = "lift",
     garden = "garden",
     security = "security",
+    powerBackup = "powerBackup",
     playground = "playground",
-    parking = "parking"
+    parking = "parking",
+    gardenArea = "gardenArea"
 }
 export enum ApprovalStatus {
     pending = "pending",
@@ -167,7 +175,8 @@ export enum ListingStatus {
     active = "active",
     pending = "pending",
     rent = "rent",
-    sold = "sold"
+    sold = "sold",
+    rejected = "rejected"
 }
 export enum PropertyType {
     commercial = "commercial",
@@ -206,7 +215,6 @@ export interface backendInterface {
         senderEmail: string;
     }): Promise<bigint>;
     createProperty(property: {
-        status: ListingStatus;
         title: string;
         propertyType: PropertyType;
         isLuxury: boolean;
@@ -214,10 +222,15 @@ export interface backendInterface {
         bhkType: BhkType;
         builtUpArea: bigint;
         description: string;
+        amenities: Array<Amenity>;
         isUnderConstruction: boolean;
         isFeatured: boolean;
+        hasBalcony: boolean;
         price: bigint;
         location: string;
+        parkingSpaces: bigint;
+        photos: Array<Uint8Array>;
+        images: Array<ExternalBlob>;
     }): Promise<bigint>;
     createTestimonial(testimonial: {
         quote: string;
@@ -225,6 +238,7 @@ export interface backendInterface {
         rating: bigint;
     }): Promise<bigint>;
     deleteProperty(propertyId: bigint): Promise<void>;
+    getAllPropertiesAdmin(): Promise<Array<Property>>;
     getAllUsers(): Promise<Array<{
         principal: Principal;
         name: string;
@@ -269,7 +283,6 @@ export interface backendInterface {
     setPropertyFeatured(propertyId: bigint, isFeatured: boolean): Promise<void>;
     setPropertyStatus(propertyId: bigint, status: ListingStatus): Promise<void>;
     updateProperty(propertyId: bigint, update: {
-        status: ListingStatus;
         title: string;
         propertyType: PropertyType;
         isLuxury: boolean;
@@ -277,10 +290,16 @@ export interface backendInterface {
         bhkType: BhkType;
         builtUpArea: bigint;
         description: string;
+        amenities: Array<Amenity>;
         isUnderConstruction: boolean;
+        hasBalcony: boolean;
         price: bigint;
         location: string;
+        parkingSpaces: bigint;
+        photos: Array<Uint8Array>;
+        images: Array<ExternalBlob>;
     }): Promise<void>;
+    updatePropertyStatus(propertyId: bigint, status: ListingStatus): Promise<void>;
 }
 import type { Amenity as _Amenity, ApprovalStatus as _ApprovalStatus, BhkType as _BhkType, ExternalBlob as _ExternalBlob, ListingStatus as _ListingStatus, Property as _Property, PropertyType as _PropertyType, Role as _Role, UserApprovalInfo as _UserApprovalInfo, UserRole as _UserRole, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -461,7 +480,6 @@ export class Backend implements backendInterface {
         }
     }
     async createProperty(arg0: {
-        status: ListingStatus;
         title: string;
         propertyType: PropertyType;
         isLuxury: boolean;
@@ -469,21 +487,26 @@ export class Backend implements backendInterface {
         bhkType: BhkType;
         builtUpArea: bigint;
         description: string;
+        amenities: Array<Amenity>;
         isUnderConstruction: boolean;
         isFeatured: boolean;
+        hasBalcony: boolean;
         price: bigint;
         location: string;
+        parkingSpaces: bigint;
+        photos: Array<Uint8Array>;
+        images: Array<ExternalBlob>;
     }): Promise<bigint> {
         if (this.processError) {
             try {
-                const result = await this.actor.createProperty(to_candid_record_n15(this._uploadFile, this._downloadFile, arg0));
+                const result = await this.actor.createProperty(await to_candid_record_n15(this._uploadFile, this._downloadFile, arg0));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.createProperty(to_candid_record_n15(this._uploadFile, this._downloadFile, arg0));
+            const result = await this.actor.createProperty(await to_candid_record_n15(this._uploadFile, this._downloadFile, arg0));
             return result;
         }
     }
@@ -519,6 +542,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getAllPropertiesAdmin(): Promise<Array<Property>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllPropertiesAdmin();
+                return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllPropertiesAdmin();
+            return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
+        }
+    }
     async getAllUsers(): Promise<Array<{
         principal: Principal;
         name: string;
@@ -529,14 +566,14 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getAllUsers();
-                return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n36(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getAllUsers();
-            return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n36(this._uploadFile, this._downloadFile, result);
         }
     }
     async getAnalyticsSummary(): Promise<AnalyticsSummary> {
@@ -575,14 +612,14 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getCallerUserRole();
-                return from_candid_UserRole_n26(this._uploadFile, this._downloadFile, result);
+                return from_candid_UserRole_n40(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getCallerUserRole();
-            return from_candid_UserRole_n26(this._uploadFile, this._downloadFile, result);
+            return from_candid_UserRole_n40(this._uploadFile, this._downloadFile, result);
         }
     }
     async getEnquiries(): Promise<Array<Enquiry>> {
@@ -617,98 +654,98 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getFeaturedProperties();
-                return from_candid_vec_n28(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getFeaturedProperties();
-            return from_candid_vec_n28(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
         }
     }
     async getForRentProperties(): Promise<Array<Property>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getForRentProperties();
-                return from_candid_vec_n28(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getForRentProperties();
-            return from_candid_vec_n28(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
         }
     }
     async getMyProperties(): Promise<Array<Property>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getMyProperties();
-                return from_candid_vec_n28(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getMyProperties();
-            return from_candid_vec_n28(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
         }
     }
     async getProperties(): Promise<Array<Property>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getProperties();
-                return from_candid_vec_n28(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getProperties();
-            return from_candid_vec_n28(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
         }
     }
     async getProperty(arg0: bigint): Promise<Property> {
         if (this.processError) {
             try {
                 const result = await this.actor.getProperty(arg0);
-                return from_candid_Property_n29(this._uploadFile, this._downloadFile, result);
+                return from_candid_Property_n23(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getProperty(arg0);
-            return from_candid_Property_n29(this._uploadFile, this._downloadFile, result);
+            return from_candid_Property_n23(this._uploadFile, this._downloadFile, result);
         }
     }
     async getSortedPropertiesByLocation(): Promise<Array<Property>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getSortedPropertiesByLocation();
-                return from_candid_vec_n28(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getSortedPropertiesByLocation();
-            return from_candid_vec_n28(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
         }
     }
     async getSortedPropertiesByPrice(arg0: boolean): Promise<Array<Property>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getSortedPropertiesByPrice(arg0);
-                return from_candid_vec_n28(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getSortedPropertiesByPrice(arg0);
-            return from_candid_vec_n28(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n22(this._uploadFile, this._downloadFile, result);
         }
     }
     async getTestimonials(): Promise<Array<Testimonial>> {
@@ -876,19 +913,18 @@ export class Backend implements backendInterface {
     async setPropertyStatus(arg0: bigint, arg1: ListingStatus): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.setPropertyStatus(arg0, to_candid_ListingStatus_n16(this._uploadFile, this._downloadFile, arg1));
+                const result = await this.actor.setPropertyStatus(arg0, to_candid_ListingStatus_n49(this._uploadFile, this._downloadFile, arg1));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.setPropertyStatus(arg0, to_candid_ListingStatus_n16(this._uploadFile, this._downloadFile, arg1));
+            const result = await this.actor.setPropertyStatus(arg0, to_candid_ListingStatus_n49(this._uploadFile, this._downloadFile, arg1));
             return result;
         }
     }
     async updateProperty(arg0: bigint, arg1: {
-        status: ListingStatus;
         title: string;
         propertyType: PropertyType;
         isLuxury: boolean;
@@ -896,53 +932,72 @@ export class Backend implements backendInterface {
         bhkType: BhkType;
         builtUpArea: bigint;
         description: string;
+        amenities: Array<Amenity>;
         isUnderConstruction: boolean;
+        hasBalcony: boolean;
         price: bigint;
         location: string;
+        parkingSpaces: bigint;
+        photos: Array<Uint8Array>;
+        images: Array<ExternalBlob>;
     }): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.updateProperty(arg0, to_candid_record_n49(this._uploadFile, this._downloadFile, arg1));
+                const result = await this.actor.updateProperty(arg0, await to_candid_record_n51(this._uploadFile, this._downloadFile, arg1));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.updateProperty(arg0, to_candid_record_n49(this._uploadFile, this._downloadFile, arg1));
+            const result = await this.actor.updateProperty(arg0, await to_candid_record_n51(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async updatePropertyStatus(arg0: bigint, arg1: ListingStatus): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updatePropertyStatus(arg0, to_candid_ListingStatus_n49(this._uploadFile, this._downloadFile, arg1));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updatePropertyStatus(arg0, to_candid_ListingStatus_n49(this._uploadFile, this._downloadFile, arg1));
             return result;
         }
     }
 }
-function from_candid_Amenity_n38(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Amenity): Amenity {
-    return from_candid_variant_n39(_uploadFile, _downloadFile, value);
+function from_candid_Amenity_n32(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Amenity): Amenity {
+    return from_candid_variant_n33(_uploadFile, _downloadFile, value);
 }
 function from_candid_ApprovalStatus_n45(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _ApprovalStatus): ApprovalStatus {
     return from_candid_variant_n46(_uploadFile, _downloadFile, value);
 }
-function from_candid_BhkType_n35(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _BhkType): BhkType {
-    return from_candid_variant_n36(_uploadFile, _downloadFile, value);
+function from_candid_BhkType_n29(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _BhkType): BhkType {
+    return from_candid_variant_n30(_uploadFile, _downloadFile, value);
 }
-async function from_candid_ExternalBlob_n41(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _ExternalBlob): Promise<ExternalBlob> {
+async function from_candid_ExternalBlob_n35(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _ExternalBlob): Promise<ExternalBlob> {
     return await _downloadFile(value);
 }
-function from_candid_ListingStatus_n31(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _ListingStatus): ListingStatus {
-    return from_candid_variant_n32(_uploadFile, _downloadFile, value);
+function from_candid_ListingStatus_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _ListingStatus): ListingStatus {
+    return from_candid_variant_n26(_uploadFile, _downloadFile, value);
 }
-function from_candid_PropertyType_n33(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _PropertyType): PropertyType {
-    return from_candid_variant_n34(_uploadFile, _downloadFile, value);
+function from_candid_PropertyType_n27(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _PropertyType): PropertyType {
+    return from_candid_variant_n28(_uploadFile, _downloadFile, value);
 }
-async function from_candid_Property_n29(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Property): Promise<Property> {
-    return await from_candid_record_n30(_uploadFile, _downloadFile, value);
+async function from_candid_Property_n23(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Property): Promise<Property> {
+    return await from_candid_record_n24(_uploadFile, _downloadFile, value);
 }
-function from_candid_Role_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Role): Role {
-    return from_candid_variant_n25(_uploadFile, _downloadFile, value);
+function from_candid_Role_n38(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Role): Role {
+    return from_candid_variant_n39(_uploadFile, _downloadFile, value);
 }
 function from_candid_UserApprovalInfo_n43(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserApprovalInfo): UserApprovalInfo {
     return from_candid_record_n44(_uploadFile, _downloadFile, value);
 }
-function from_candid_UserRole_n26(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
-    return from_candid_variant_n27(_uploadFile, _downloadFile, value);
+function from_candid_UserRole_n40(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
+    return from_candid_variant_n41(_uploadFile, _downloadFile, value);
 }
 function from_candid__CaffeineStorageRefillResult_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: __CaffeineStorageRefillResult): _CaffeineStorageRefillResult {
     return from_candid_record_n5(_uploadFile, _downloadFile, value);
@@ -953,28 +1008,7 @@ function from_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Ar
 function from_candid_opt_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [bigint]): bigint | null {
     return value.length === 0 ? null : value[0];
 }
-function from_candid_record_n23(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    principal: Principal;
-    name: string;
-    role: _Role;
-    email: string;
-    phone: string;
-}): {
-    principal: Principal;
-    name: string;
-    role: Role;
-    email: string;
-    phone: string;
-} {
-    return {
-        principal: value.principal,
-        name: value.name,
-        role: from_candid_Role_n24(_uploadFile, _downloadFile, value.role),
-        email: value.email,
-        phone: value.phone
-    };
-}
-async function from_candid_record_n30(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+async function from_candid_record_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     id: bigint;
     status: _ListingStatus;
     title: string;
@@ -988,8 +1022,11 @@ async function from_candid_record_n30(_uploadFile: (file: ExternalBlob) => Promi
     amenities: Array<_Amenity>;
     isUnderConstruction: boolean;
     isFeatured: boolean;
+    hasBalcony: boolean;
     price: bigint;
     location: string;
+    parkingSpaces: bigint;
+    photos: Array<Uint8Array>;
     images: Array<_ExternalBlob>;
 }): Promise<{
     id: bigint;
@@ -1005,27 +1042,54 @@ async function from_candid_record_n30(_uploadFile: (file: ExternalBlob) => Promi
     amenities: Array<Amenity>;
     isUnderConstruction: boolean;
     isFeatured: boolean;
+    hasBalcony: boolean;
     price: bigint;
     location: string;
+    parkingSpaces: bigint;
+    photos: Array<Uint8Array>;
     images: Array<ExternalBlob>;
 }> {
     return {
         id: value.id,
-        status: from_candid_ListingStatus_n31(_uploadFile, _downloadFile, value.status),
+        status: from_candid_ListingStatus_n25(_uploadFile, _downloadFile, value.status),
         title: value.title,
-        propertyType: from_candid_PropertyType_n33(_uploadFile, _downloadFile, value.propertyType),
+        propertyType: from_candid_PropertyType_n27(_uploadFile, _downloadFile, value.propertyType),
         isLuxury: value.isLuxury,
         owner: value.owner,
         carpetArea: value.carpetArea,
-        bhkType: from_candid_BhkType_n35(_uploadFile, _downloadFile, value.bhkType),
+        bhkType: from_candid_BhkType_n29(_uploadFile, _downloadFile, value.bhkType),
         builtUpArea: value.builtUpArea,
         description: value.description,
-        amenities: from_candid_vec_n37(_uploadFile, _downloadFile, value.amenities),
+        amenities: from_candid_vec_n31(_uploadFile, _downloadFile, value.amenities),
         isUnderConstruction: value.isUnderConstruction,
         isFeatured: value.isFeatured,
+        hasBalcony: value.hasBalcony,
         price: value.price,
         location: value.location,
-        images: await from_candid_vec_n40(_uploadFile, _downloadFile, value.images)
+        parkingSpaces: value.parkingSpaces,
+        photos: value.photos,
+        images: await from_candid_vec_n34(_uploadFile, _downloadFile, value.images)
+    };
+}
+function from_candid_record_n37(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    principal: Principal;
+    name: string;
+    role: _Role;
+    email: string;
+    phone: string;
+}): {
+    principal: Principal;
+    name: string;
+    role: Role;
+    email: string;
+    phone: string;
+} {
+    return {
+        principal: value.principal,
+        name: value.name,
+        role: from_candid_Role_n38(_uploadFile, _downloadFile, value.role),
+        email: value.email,
+        phone: value.phone
     };
 }
 function from_candid_record_n44(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
@@ -1052,23 +1116,7 @@ function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint
         topped_up_amount: record_opt_to_undefined(from_candid_opt_n7(_uploadFile, _downloadFile, value.topped_up_amount))
     };
 }
-function from_candid_variant_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    admin: null;
-} | {
-    user: null;
-}): Role {
-    return "admin" in value ? Role.admin : "user" in value ? Role.user : value;
-}
-function from_candid_variant_n27(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    admin: null;
-} | {
-    user: null;
-} | {
-    guest: null;
-}): UserRole {
-    return "admin" in value ? UserRole.admin : "user" in value ? UserRole.user : "guest" in value ? UserRole.guest : value;
-}
-function from_candid_variant_n32(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_variant_n26(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     active: null;
 } | {
     pending: null;
@@ -1076,10 +1124,12 @@ function from_candid_variant_n32(_uploadFile: (file: ExternalBlob) => Promise<Ui
     rent: null;
 } | {
     sold: null;
+} | {
+    rejected: null;
 }): ListingStatus {
-    return "active" in value ? ListingStatus.active : "pending" in value ? ListingStatus.pending : "rent" in value ? ListingStatus.rent : "sold" in value ? ListingStatus.sold : value;
+    return "active" in value ? ListingStatus.active : "pending" in value ? ListingStatus.pending : "rent" in value ? ListingStatus.rent : "sold" in value ? ListingStatus.sold : "rejected" in value ? ListingStatus.rejected : value;
 }
-function from_candid_variant_n34(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_variant_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     commercial: null;
 } | {
     villa: null;
@@ -1092,7 +1142,7 @@ function from_candid_variant_n34(_uploadFile: (file: ExternalBlob) => Promise<Ui
 }): PropertyType {
     return "commercial" in value ? PropertyType.commercial : "villa" in value ? PropertyType.villa : "plot" in value ? PropertyType.plot : "apartment" in value ? PropertyType.apartment : "rowHouse" in value ? PropertyType.rowHouse : value;
 }
-function from_candid_variant_n36(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_variant_n30(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     bhk1: null;
 } | {
     bhk2: null;
@@ -1105,20 +1155,46 @@ function from_candid_variant_n36(_uploadFile: (file: ExternalBlob) => Promise<Ui
 }): BhkType {
     return "bhk1" in value ? BhkType.bhk1 : "bhk2" in value ? BhkType.bhk2 : "bhk3" in value ? BhkType.bhk3 : "bhk4" in value ? BhkType.bhk4 : "bhk5plus" in value ? BhkType.bhk5plus : value;
 }
-function from_candid_variant_n39(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_variant_n33(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     gym: null;
 } | {
     swimmingPool: null;
+} | {
+    balcony: null;
+} | {
+    club: null;
+} | {
+    lift: null;
 } | {
     garden: null;
 } | {
     security: null;
 } | {
+    powerBackup: null;
+} | {
     playground: null;
 } | {
     parking: null;
+} | {
+    gardenArea: null;
 }): Amenity {
-    return "gym" in value ? Amenity.gym : "swimmingPool" in value ? Amenity.swimmingPool : "garden" in value ? Amenity.garden : "security" in value ? Amenity.security : "playground" in value ? Amenity.playground : "parking" in value ? Amenity.parking : value;
+    return "gym" in value ? Amenity.gym : "swimmingPool" in value ? Amenity.swimmingPool : "balcony" in value ? Amenity.balcony : "club" in value ? Amenity.club : "lift" in value ? Amenity.lift : "garden" in value ? Amenity.garden : "security" in value ? Amenity.security : "powerBackup" in value ? Amenity.powerBackup : "playground" in value ? Amenity.playground : "parking" in value ? Amenity.parking : "gardenArea" in value ? Amenity.gardenArea : value;
+}
+function from_candid_variant_n39(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    admin: null;
+} | {
+    user: null;
+}): Role {
+    return "admin" in value ? Role.admin : "user" in value ? Role.user : value;
+}
+function from_candid_variant_n41(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    admin: null;
+} | {
+    user: null;
+} | {
+    guest: null;
+}): UserRole {
+    return "admin" in value ? UserRole.admin : "user" in value ? UserRole.user : "guest" in value ? UserRole.guest : value;
 }
 function from_candid_variant_n46(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     pending: null;
@@ -1129,7 +1205,16 @@ function from_candid_variant_n46(_uploadFile: (file: ExternalBlob) => Promise<Ui
 }): ApprovalStatus {
     return "pending" in value ? ApprovalStatus.pending : "approved" in value ? ApprovalStatus.approved : "rejected" in value ? ApprovalStatus.rejected : value;
 }
-function from_candid_vec_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<{
+async function from_candid_vec_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Property>): Promise<Array<Property>> {
+    return await Promise.all(value.map(async (x)=>await from_candid_Property_n23(_uploadFile, _downloadFile, x)));
+}
+function from_candid_vec_n31(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Amenity>): Array<Amenity> {
+    return value.map((x)=>from_candid_Amenity_n32(_uploadFile, _downloadFile, x));
+}
+async function from_candid_vec_n34(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_ExternalBlob>): Promise<Array<ExternalBlob>> {
+    return await Promise.all(value.map(async (x)=>await from_candid_ExternalBlob_n35(_uploadFile, _downloadFile, x)));
+}
+function from_candid_vec_n36(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<{
     principal: Principal;
     name: string;
     role: _Role;
@@ -1142,16 +1227,7 @@ function from_candid_vec_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8A
     email: string;
     phone: string;
 }> {
-    return value.map((x)=>from_candid_record_n23(_uploadFile, _downloadFile, x));
-}
-async function from_candid_vec_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Property>): Promise<Array<Property>> {
-    return await Promise.all(value.map(async (x)=>await from_candid_Property_n29(_uploadFile, _downloadFile, x)));
-}
-function from_candid_vec_n37(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Amenity>): Array<Amenity> {
-    return value.map((x)=>from_candid_Amenity_n38(_uploadFile, _downloadFile, x));
-}
-async function from_candid_vec_n40(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_ExternalBlob>): Promise<Array<ExternalBlob>> {
-    return await Promise.all(value.map(async (x)=>await from_candid_ExternalBlob_n41(_uploadFile, _downloadFile, x)));
+    return value.map((x)=>from_candid_record_n37(_uploadFile, _downloadFile, x));
 }
 function from_candid_vec_n42(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_UserApprovalInfo>): Array<UserApprovalInfo> {
     return value.map((x)=>from_candid_UserApprovalInfo_n43(_uploadFile, _downloadFile, x));
@@ -1162,14 +1238,17 @@ function to_candid_Amenity_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8
 function to_candid_ApprovalStatus_n47(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: ApprovalStatus): _ApprovalStatus {
     return to_candid_variant_n48(_uploadFile, _downloadFile, value);
 }
-function to_candid_BhkType_n20(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: BhkType): _BhkType {
-    return to_candid_variant_n21(_uploadFile, _downloadFile, value);
-}
-function to_candid_ListingStatus_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: ListingStatus): _ListingStatus {
-    return to_candid_variant_n17(_uploadFile, _downloadFile, value);
-}
-function to_candid_PropertyType_n18(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: PropertyType): _PropertyType {
+function to_candid_BhkType_n18(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: BhkType): _BhkType {
     return to_candid_variant_n19(_uploadFile, _downloadFile, value);
+}
+async function to_candid_ExternalBlob_n21(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: ExternalBlob): Promise<_ExternalBlob> {
+    return await _uploadFile(value);
+}
+function to_candid_ListingStatus_n49(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: ListingStatus): _ListingStatus {
+    return to_candid_variant_n50(_uploadFile, _downloadFile, value);
+}
+function to_candid_PropertyType_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: PropertyType): _PropertyType {
+    return to_candid_variant_n17(_uploadFile, _downloadFile, value);
 }
 function to_candid_Role_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Role): _Role {
     return to_candid_variant_n14(_uploadFile, _downloadFile, value);
@@ -1183,8 +1262,7 @@ function to_candid__CaffeineStorageRefillInformation_n2(_uploadFile: (file: Exte
 function to_candid_opt_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _CaffeineStorageRefillInformation | null): [] | [__CaffeineStorageRefillInformation] {
     return value === null ? candid_none() : candid_some(to_candid__CaffeineStorageRefillInformation_n2(_uploadFile, _downloadFile, value));
 }
-function to_candid_record_n15(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    status: ListingStatus;
+async function to_candid_record_n15(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     title: string;
     propertyType: PropertyType;
     isLuxury: boolean;
@@ -1192,12 +1270,16 @@ function to_candid_record_n15(_uploadFile: (file: ExternalBlob) => Promise<Uint8
     bhkType: BhkType;
     builtUpArea: bigint;
     description: string;
+    amenities: Array<Amenity>;
     isUnderConstruction: boolean;
     isFeatured: boolean;
+    hasBalcony: boolean;
     price: bigint;
     location: string;
-}): {
-    status: _ListingStatus;
+    parkingSpaces: bigint;
+    photos: Array<Uint8Array>;
+    images: Array<ExternalBlob>;
+}): Promise<{
     title: string;
     propertyType: _PropertyType;
     isLuxury: boolean;
@@ -1205,24 +1287,33 @@ function to_candid_record_n15(_uploadFile: (file: ExternalBlob) => Promise<Uint8
     bhkType: _BhkType;
     builtUpArea: bigint;
     description: string;
+    amenities: Array<_Amenity>;
     isUnderConstruction: boolean;
     isFeatured: boolean;
+    hasBalcony: boolean;
     price: bigint;
     location: string;
-} {
+    parkingSpaces: bigint;
+    photos: Array<Uint8Array>;
+    images: Array<_ExternalBlob>;
+}> {
     return {
-        status: to_candid_ListingStatus_n16(_uploadFile, _downloadFile, value.status),
         title: value.title,
-        propertyType: to_candid_PropertyType_n18(_uploadFile, _downloadFile, value.propertyType),
+        propertyType: to_candid_PropertyType_n16(_uploadFile, _downloadFile, value.propertyType),
         isLuxury: value.isLuxury,
         carpetArea: value.carpetArea,
-        bhkType: to_candid_BhkType_n20(_uploadFile, _downloadFile, value.bhkType),
+        bhkType: to_candid_BhkType_n18(_uploadFile, _downloadFile, value.bhkType),
         builtUpArea: value.builtUpArea,
         description: value.description,
+        amenities: to_candid_vec_n8(_uploadFile, _downloadFile, value.amenities),
         isUnderConstruction: value.isUnderConstruction,
         isFeatured: value.isFeatured,
+        hasBalcony: value.hasBalcony,
         price: value.price,
-        location: value.location
+        location: value.location,
+        parkingSpaces: value.parkingSpaces,
+        photos: value.photos,
+        images: await to_candid_vec_n20(_uploadFile, _downloadFile, value.images)
     };
 }
 function to_candid_record_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
@@ -1234,8 +1325,7 @@ function to_candid_record_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8A
         proposed_top_up_amount: value.proposed_top_up_amount ? candid_some(value.proposed_top_up_amount) : candid_none()
     };
 }
-function to_candid_record_n49(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    status: ListingStatus;
+async function to_candid_record_n51(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     title: string;
     propertyType: PropertyType;
     isLuxury: boolean;
@@ -1243,11 +1333,15 @@ function to_candid_record_n49(_uploadFile: (file: ExternalBlob) => Promise<Uint8
     bhkType: BhkType;
     builtUpArea: bigint;
     description: string;
+    amenities: Array<Amenity>;
     isUnderConstruction: boolean;
+    hasBalcony: boolean;
     price: bigint;
     location: string;
-}): {
-    status: _ListingStatus;
+    parkingSpaces: bigint;
+    photos: Array<Uint8Array>;
+    images: Array<ExternalBlob>;
+}): Promise<{
     title: string;
     propertyType: _PropertyType;
     isLuxury: boolean;
@@ -1255,22 +1349,31 @@ function to_candid_record_n49(_uploadFile: (file: ExternalBlob) => Promise<Uint8
     bhkType: _BhkType;
     builtUpArea: bigint;
     description: string;
+    amenities: Array<_Amenity>;
     isUnderConstruction: boolean;
+    hasBalcony: boolean;
     price: bigint;
     location: string;
-} {
+    parkingSpaces: bigint;
+    photos: Array<Uint8Array>;
+    images: Array<_ExternalBlob>;
+}> {
     return {
-        status: to_candid_ListingStatus_n16(_uploadFile, _downloadFile, value.status),
         title: value.title,
-        propertyType: to_candid_PropertyType_n18(_uploadFile, _downloadFile, value.propertyType),
+        propertyType: to_candid_PropertyType_n16(_uploadFile, _downloadFile, value.propertyType),
         isLuxury: value.isLuxury,
         carpetArea: value.carpetArea,
-        bhkType: to_candid_BhkType_n20(_uploadFile, _downloadFile, value.bhkType),
+        bhkType: to_candid_BhkType_n18(_uploadFile, _downloadFile, value.bhkType),
         builtUpArea: value.builtUpArea,
         description: value.description,
+        amenities: to_candid_vec_n8(_uploadFile, _downloadFile, value.amenities),
         isUnderConstruction: value.isUnderConstruction,
+        hasBalcony: value.hasBalcony,
         price: value.price,
-        location: value.location
+        location: value.location,
+        parkingSpaces: value.parkingSpaces,
+        photos: value.photos,
+        images: await to_candid_vec_n20(_uploadFile, _downloadFile, value.images)
     };
 }
 function to_candid_variant_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Amenity): {
@@ -1278,26 +1381,46 @@ function to_candid_variant_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint
 } | {
     swimmingPool: null;
 } | {
+    balcony: null;
+} | {
+    club: null;
+} | {
+    lift: null;
+} | {
     garden: null;
 } | {
     security: null;
 } | {
+    powerBackup: null;
+} | {
     playground: null;
 } | {
     parking: null;
+} | {
+    gardenArea: null;
 } {
     return value == Amenity.gym ? {
         gym: null
     } : value == Amenity.swimmingPool ? {
         swimmingPool: null
+    } : value == Amenity.balcony ? {
+        balcony: null
+    } : value == Amenity.club ? {
+        club: null
+    } : value == Amenity.lift ? {
+        lift: null
     } : value == Amenity.garden ? {
         garden: null
     } : value == Amenity.security ? {
         security: null
+    } : value == Amenity.powerBackup ? {
+        powerBackup: null
     } : value == Amenity.playground ? {
         playground: null
     } : value == Amenity.parking ? {
         parking: null
+    } : value == Amenity.gardenArea ? {
+        gardenArea: null
     } : value;
 }
 function to_candid_variant_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): {
@@ -1326,26 +1449,7 @@ function to_candid_variant_n14(_uploadFile: (file: ExternalBlob) => Promise<Uint
         user: null
     } : value;
 }
-function to_candid_variant_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: ListingStatus): {
-    active: null;
-} | {
-    pending: null;
-} | {
-    rent: null;
-} | {
-    sold: null;
-} {
-    return value == ListingStatus.active ? {
-        active: null
-    } : value == ListingStatus.pending ? {
-        pending: null
-    } : value == ListingStatus.rent ? {
-        rent: null
-    } : value == ListingStatus.sold ? {
-        sold: null
-    } : value;
-}
-function to_candid_variant_n19(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: PropertyType): {
+function to_candid_variant_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: PropertyType): {
     commercial: null;
 } | {
     villa: null;
@@ -1368,7 +1472,7 @@ function to_candid_variant_n19(_uploadFile: (file: ExternalBlob) => Promise<Uint
         rowHouse: null
     } : value;
 }
-function to_candid_variant_n21(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: BhkType): {
+function to_candid_variant_n19(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: BhkType): {
     bhk1: null;
 } | {
     bhk2: null;
@@ -1405,6 +1509,32 @@ function to_candid_variant_n48(_uploadFile: (file: ExternalBlob) => Promise<Uint
     } : value == ApprovalStatus.rejected ? {
         rejected: null
     } : value;
+}
+function to_candid_variant_n50(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: ListingStatus): {
+    active: null;
+} | {
+    pending: null;
+} | {
+    rent: null;
+} | {
+    sold: null;
+} | {
+    rejected: null;
+} {
+    return value == ListingStatus.active ? {
+        active: null
+    } : value == ListingStatus.pending ? {
+        pending: null
+    } : value == ListingStatus.rent ? {
+        rent: null
+    } : value == ListingStatus.sold ? {
+        sold: null
+    } : value == ListingStatus.rejected ? {
+        rejected: null
+    } : value;
+}
+async function to_candid_vec_n20(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<ExternalBlob>): Promise<Array<_ExternalBlob>> {
+    return await Promise.all(value.map(async (x)=>await to_candid_ExternalBlob_n21(_uploadFile, _downloadFile, x)));
 }
 function to_candid_vec_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<Amenity>): Array<_Amenity> {
     return value.map((x)=>to_candid_Amenity_n9(_uploadFile, _downloadFile, x));

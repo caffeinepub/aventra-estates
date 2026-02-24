@@ -2,15 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-dedicated-rent-property-category-throughout-the-application-the-search-bar-on-the-homepage-already-has-a-rent-tab-ensure-it-correctly-filters-and-navigates-to-the-property-listing-page-showing-only-rental-listings-add-for-rent-as-a-valid-listing-type-status-in-the-backend-data-model-alongside-existing-statuses-allow-users-to-post-properties-listed-as-for-rent-via-the-post-property-multi-step-form-by-including-a-listing-type-field-buy-rent-display-a-for-rent-badge-on-property-cards-and-detail-pages-for-rental-listings",
-      "featureTitle": "Add a dedicated 'Rent' property category throughout the application. The Search Bar on the homepage already has a 'Rent' tab — ensure it correctly filters and navigates to the property listing page showing only rental listings. Add 'For Rent' as a valid listing type/status in the backend data model alongside existing statuses. Allow users to post properties listed as 'For Rent' via the Post Property multi-step form by including a 'Listing Type' field (Buy / Rent). Display a 'For Rent' badge on property cards and detail pages for rental listings.",
+      "featureId": "feature-in-postpropertypage-features-photos-step-remove-all-photo-url-text-input-fields-and-replace-them-with-a-file-upload-input-that-accepts-jpeg-image-files-accept-image-jpeg-image-jpg-allow-uploading-multiple-files-read-uploaded-files-as-binary-data-e-g-via-filereader-as-arraybuffer-or-base64-and-store-them-in-component-state-for-submission-display-thumbnail-previews-of-selected-images-before-submission",
+      "featureTitle": "In PostPropertyPage (Features & Photos step), remove all photo URL text input fields and replace them with a file upload input that accepts JPEG image files (accept='image/jpeg,image/jpg'). Allow uploading multiple files. Read uploaded files as binary data (e.g., via FileReader as ArrayBuffer or base64) and store them in component state for submission. Display thumbnail previews of selected images before submission.",
       "files": [
-        "frontend/src/components/PropertyCard.tsx",
-        "frontend/src/components/PropertyListingFilters.tsx",
-        "frontend/src/components/SearchBar.tsx",
-        "frontend/src/pages/PostPropertyPage.tsx",
-        "frontend/src/pages/PropertyDetailPage.tsx",
-        "frontend/src/pages/PropertyListingPage.tsx"
+        "frontend/src/pages/PostPropertyPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -23,17 +18,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-10"
+        "REQ-20"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-all-site-wide-contact-information-to-reflect-the-official-aventra-estates-details-phone-numbers-917020271267-and-919535511171-email-aventraestate-gmail-com-and-office-address-near-goodluck-apartment-kondhwa-pune-411048-this-information-must-appear-in-the-footer-component-and-on-any-contact-about-section-whatsapp-quick-contact-links-should-use-917020271267-as-the-default-number",
-      "featureTitle": "Update all site-wide contact information to reflect the official Aventra Estates details: phone numbers +917020271267 and +919535511171, email aventraestate@gmail.com, and office address 'Near Goodluck Apartment, Kondhwa, Pune 411048'. This information must appear in the Footer component and on any Contact / About section. WhatsApp quick-contact links should use +917020271267 as the default number.",
+      "featureId": "feature-in-editpropertypage-remove-all-photo-url-text-input-fields-and-replace-them-with-a-jpeg-file-upload-input-accept-image-jpeg-image-jpg-pre-populate-the-photo-preview-area-with-existing-photos-from-the-property-data-allow-the-user-to-upload-new-jpeg-files-to-replace-or-add-to-existing-photos-display-thumbnail-previews-of-both-existing-and-newly-selected-photos",
+      "featureTitle": "In EditPropertyPage, remove all photo URL text input fields and replace them with a JPEG file upload input (accept='image/jpeg,image/jpg'). Pre-populate the photo preview area with existing photos from the property data. Allow the user to upload new JPEG files to replace or add to existing photos. Display thumbnail previews of both existing and newly selected photos.",
       "files": [
-        "frontend/src/components/AgentCard.tsx",
-        "frontend/src/components/Footer.tsx",
-        "frontend/src/components/PropertyCard.tsx"
+        "frontend/src/pages/EditPropertyPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -46,7 +39,31 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-11"
+        "REQ-21"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-propertycard-propertylistingpage-propertydetailpage-imagegalleryslider-and-any-other-component-that-renders-property-photos-to-handle-the-new-blob-base64-photo-format-convert-stored-photo-blob-data-to-object-urls-or-base64-data-uris-for-rendering-in-img-tags-ensure-backward-compatibility-where-no-photos-exist-show-a-placeholder-image",
+      "featureTitle": "Update PropertyCard, PropertyListingPage, PropertyDetailPage (ImageGallerySlider), and any other component that renders property photos to handle the new blob/base64 photo format. Convert stored photo blob data to object URLs or base64 data URIs for rendering in <img> tags. Ensure backward compatibility where no photos exist (show a placeholder image).",
+      "files": [
+        "frontend/src/components/ImageGallerySlider.tsx",
+        "frontend/src/components/PropertyCard.tsx",
+        "frontend/src/pages/PropertyDetailPage.tsx",
+        "frontend/src/pages/UserDashboard.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "user-approval@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-22"
       ],
       "confidence": "high"
     }

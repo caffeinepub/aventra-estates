@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { useInternetIdentity } from './useInternetIdentity';
 import type { Property, Testimonial, Enquiry, UserApprovalInfo, AnalyticsSummary, ListingStatus, PropertyType, BhkType, Amenity, ApprovalStatus, Role } from '../backend';
+import { ExternalBlob } from '../backend';
 import { Principal } from '@dfinity/principal';
 
 // ─── User Profile ────────────────────────────────────────────────────────────
@@ -46,7 +47,7 @@ export function useSaveCallerUserProfile() {
   });
 }
 
-export function useGetUserProfile(target: Principal | null) {
+export function useGetUserProfile(target: Principal | null | undefined) {
   const { actor, isFetching } = useActor();
 
   return useQuery({
@@ -114,13 +115,26 @@ export function useGetMyProperties() {
   });
 }
 
+export function useGetAllPropertiesAdmin() {
+  const { actor, isFetching } = useActor();
+  const { identity } = useInternetIdentity();
+
+  return useQuery<Property[]>({
+    queryKey: ['adminProperties'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAllPropertiesAdmin();
+    },
+    enabled: !!actor && !isFetching && !!identity,
+  });
+}
+
 export function useCreateProperty() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (property: {
-      status: ListingStatus;
       title: string;
       propertyType: PropertyType;
       isLuxury: boolean;
@@ -128,10 +142,15 @@ export function useCreateProperty() {
       bhkType: BhkType;
       builtUpArea: bigint;
       description: string;
+      amenities: Amenity[];
       isUnderConstruction: boolean;
       isFeatured: boolean;
+      hasBalcony: boolean;
       price: bigint;
       location: string;
+      parkingSpaces: bigint;
+      photos: Uint8Array[];
+      images: ExternalBlob[];
     }) => {
       if (!actor) throw new Error('Actor not available');
       return actor.createProperty(property);
@@ -140,6 +159,7 @@ export function useCreateProperty() {
       queryClient.invalidateQueries({ queryKey: ['properties'] });
       queryClient.invalidateQueries({ queryKey: ['myProperties'] });
       queryClient.invalidateQueries({ queryKey: ['featuredProperties'] });
+      queryClient.invalidateQueries({ queryKey: ['adminProperties'] });
     },
   });
 }
@@ -152,7 +172,6 @@ export function useUpdateProperty() {
     mutationFn: async ({ id, update }: {
       id: bigint;
       update: {
-        status: ListingStatus;
         title: string;
         propertyType: PropertyType;
         isLuxury: boolean;
@@ -160,9 +179,14 @@ export function useUpdateProperty() {
         bhkType: BhkType;
         builtUpArea: bigint;
         description: string;
+        amenities: Amenity[];
         isUnderConstruction: boolean;
+        hasBalcony: boolean;
         price: bigint;
         location: string;
+        parkingSpaces: bigint;
+        photos: Uint8Array[];
+        images: ExternalBlob[];
       };
     }) => {
       if (!actor) throw new Error('Actor not available');
@@ -172,6 +196,7 @@ export function useUpdateProperty() {
       queryClient.invalidateQueries({ queryKey: ['properties'] });
       queryClient.invalidateQueries({ queryKey: ['myProperties'] });
       queryClient.invalidateQueries({ queryKey: ['property'] });
+      queryClient.invalidateQueries({ queryKey: ['adminProperties'] });
     },
   });
 }
@@ -188,6 +213,7 @@ export function useDeleteProperty() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['properties'] });
       queryClient.invalidateQueries({ queryKey: ['myProperties'] });
+      queryClient.invalidateQueries({ queryKey: ['adminProperties'] });
     },
   });
 }
@@ -219,6 +245,24 @@ export function useSetPropertyStatus() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['properties'] });
+      queryClient.invalidateQueries({ queryKey: ['adminProperties'] });
+    },
+  });
+}
+
+export function useUpdatePropertyStatus() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, status }: { id: bigint; status: ListingStatus }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.updatePropertyStatus(id, status);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
+      queryClient.invalidateQueries({ queryKey: ['adminProperties'] });
+      queryClient.invalidateQueries({ queryKey: ['analyticsSummary'] });
     },
   });
 }
@@ -235,6 +279,7 @@ export function useSetPropertyFeatured() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['properties'] });
       queryClient.invalidateQueries({ queryKey: ['featuredProperties'] });
+      queryClient.invalidateQueries({ queryKey: ['adminProperties'] });
     },
   });
 }
@@ -455,21 +500,6 @@ export function useSetApproval() {
   });
 }
 
-export function useAssignRole() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ user, role }: { user: Principal; role: Role }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.assignRole(user, role);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['allUsers'] });
-    },
-  });
-}
-
 export function useRequestApproval() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
@@ -481,6 +511,22 @@ export function useRequestApproval() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['isCallerApproved'] });
+      queryClient.invalidateQueries({ queryKey: ['approvals'] });
+    },
+  });
+}
+
+export function useAssignRole() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ user, role }: { user: Principal; role: Role }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.assignRole(user, role);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['allUsers'] });
     },
   });
 }

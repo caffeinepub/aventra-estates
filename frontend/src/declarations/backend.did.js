@@ -22,10 +22,15 @@ export const _CaffeineStorageRefillResult = IDL.Record({
 export const Amenity = IDL.Variant({
   'gym' : IDL.Null,
   'swimmingPool' : IDL.Null,
+  'balcony' : IDL.Null,
+  'club' : IDL.Null,
+  'lift' : IDL.Null,
   'garden' : IDL.Null,
   'security' : IDL.Null,
+  'powerBackup' : IDL.Null,
   'playground' : IDL.Null,
   'parking' : IDL.Null,
+  'gardenArea' : IDL.Null,
 });
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
@@ -33,12 +38,6 @@ export const UserRole = IDL.Variant({
   'guest' : IDL.Null,
 });
 export const Role = IDL.Variant({ 'admin' : IDL.Null, 'user' : IDL.Null });
-export const ListingStatus = IDL.Variant({
-  'active' : IDL.Null,
-  'pending' : IDL.Null,
-  'rent' : IDL.Null,
-  'sold' : IDL.Null,
-});
 export const PropertyType = IDL.Variant({
   'commercial' : IDL.Null,
   'villa' : IDL.Null,
@@ -52,6 +51,35 @@ export const BhkType = IDL.Variant({
   'bhk3' : IDL.Null,
   'bhk4' : IDL.Null,
   'bhk5plus' : IDL.Null,
+});
+export const ExternalBlob = IDL.Vec(IDL.Nat8);
+export const ListingStatus = IDL.Variant({
+  'active' : IDL.Null,
+  'pending' : IDL.Null,
+  'rent' : IDL.Null,
+  'sold' : IDL.Null,
+  'rejected' : IDL.Null,
+});
+export const Property = IDL.Record({
+  'id' : IDL.Nat,
+  'status' : ListingStatus,
+  'title' : IDL.Text,
+  'propertyType' : PropertyType,
+  'isLuxury' : IDL.Bool,
+  'owner' : IDL.Principal,
+  'carpetArea' : IDL.Nat,
+  'bhkType' : BhkType,
+  'builtUpArea' : IDL.Nat,
+  'description' : IDL.Text,
+  'amenities' : IDL.Vec(Amenity),
+  'isUnderConstruction' : IDL.Bool,
+  'isFeatured' : IDL.Bool,
+  'hasBalcony' : IDL.Bool,
+  'price' : IDL.Nat,
+  'location' : IDL.Text,
+  'parkingSpaces' : IDL.Nat,
+  'photos' : IDL.Vec(IDL.Vec(IDL.Nat8)),
+  'images' : IDL.Vec(ExternalBlob),
 });
 export const AnalyticsSummary = IDL.Record({
   'pendingApprovals' : IDL.Nat,
@@ -67,25 +95,6 @@ export const Enquiry = IDL.Record({
   'timestamp' : IDL.Int,
   'senderName' : IDL.Text,
   'senderEmail' : IDL.Text,
-});
-export const ExternalBlob = IDL.Vec(IDL.Nat8);
-export const Property = IDL.Record({
-  'id' : IDL.Nat,
-  'status' : ListingStatus,
-  'title' : IDL.Text,
-  'propertyType' : PropertyType,
-  'isLuxury' : IDL.Bool,
-  'owner' : IDL.Principal,
-  'carpetArea' : IDL.Nat,
-  'bhkType' : BhkType,
-  'builtUpArea' : IDL.Nat,
-  'description' : IDL.Text,
-  'amenities' : IDL.Vec(Amenity),
-  'isUnderConstruction' : IDL.Bool,
-  'isFeatured' : IDL.Bool,
-  'price' : IDL.Nat,
-  'location' : IDL.Text,
-  'images' : IDL.Vec(ExternalBlob),
 });
 export const Testimonial = IDL.Record({
   'id' : IDL.Nat,
@@ -152,7 +161,6 @@ export const idlService = IDL.Service({
   'createProperty' : IDL.Func(
       [
         IDL.Record({
-          'status' : ListingStatus,
           'title' : IDL.Text,
           'propertyType' : PropertyType,
           'isLuxury' : IDL.Bool,
@@ -160,10 +168,15 @@ export const idlService = IDL.Service({
           'bhkType' : BhkType,
           'builtUpArea' : IDL.Nat,
           'description' : IDL.Text,
+          'amenities' : IDL.Vec(Amenity),
           'isUnderConstruction' : IDL.Bool,
           'isFeatured' : IDL.Bool,
+          'hasBalcony' : IDL.Bool,
           'price' : IDL.Nat,
           'location' : IDL.Text,
+          'parkingSpaces' : IDL.Nat,
+          'photos' : IDL.Vec(IDL.Vec(IDL.Nat8)),
+          'images' : IDL.Vec(ExternalBlob),
         }),
       ],
       [IDL.Nat],
@@ -181,6 +194,7 @@ export const idlService = IDL.Service({
       [],
     ),
   'deleteProperty' : IDL.Func([IDL.Nat], [], []),
+  'getAllPropertiesAdmin' : IDL.Func([], [IDL.Vec(Property)], ['query']),
   'getAllUsers' : IDL.Func(
       [],
       [
@@ -266,7 +280,6 @@ export const idlService = IDL.Service({
       [
         IDL.Nat,
         IDL.Record({
-          'status' : ListingStatus,
           'title' : IDL.Text,
           'propertyType' : PropertyType,
           'isLuxury' : IDL.Bool,
@@ -274,14 +287,20 @@ export const idlService = IDL.Service({
           'bhkType' : BhkType,
           'builtUpArea' : IDL.Nat,
           'description' : IDL.Text,
+          'amenities' : IDL.Vec(Amenity),
           'isUnderConstruction' : IDL.Bool,
+          'hasBalcony' : IDL.Bool,
           'price' : IDL.Nat,
           'location' : IDL.Text,
+          'parkingSpaces' : IDL.Nat,
+          'photos' : IDL.Vec(IDL.Vec(IDL.Nat8)),
+          'images' : IDL.Vec(ExternalBlob),
         }),
       ],
       [],
       [],
     ),
+  'updatePropertyStatus' : IDL.Func([IDL.Nat, ListingStatus], [], []),
 });
 
 export const idlInitArgs = [];
@@ -301,10 +320,15 @@ export const idlFactory = ({ IDL }) => {
   const Amenity = IDL.Variant({
     'gym' : IDL.Null,
     'swimmingPool' : IDL.Null,
+    'balcony' : IDL.Null,
+    'club' : IDL.Null,
+    'lift' : IDL.Null,
     'garden' : IDL.Null,
     'security' : IDL.Null,
+    'powerBackup' : IDL.Null,
     'playground' : IDL.Null,
     'parking' : IDL.Null,
+    'gardenArea' : IDL.Null,
   });
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
@@ -312,12 +336,6 @@ export const idlFactory = ({ IDL }) => {
     'guest' : IDL.Null,
   });
   const Role = IDL.Variant({ 'admin' : IDL.Null, 'user' : IDL.Null });
-  const ListingStatus = IDL.Variant({
-    'active' : IDL.Null,
-    'pending' : IDL.Null,
-    'rent' : IDL.Null,
-    'sold' : IDL.Null,
-  });
   const PropertyType = IDL.Variant({
     'commercial' : IDL.Null,
     'villa' : IDL.Null,
@@ -331,6 +349,35 @@ export const idlFactory = ({ IDL }) => {
     'bhk3' : IDL.Null,
     'bhk4' : IDL.Null,
     'bhk5plus' : IDL.Null,
+  });
+  const ExternalBlob = IDL.Vec(IDL.Nat8);
+  const ListingStatus = IDL.Variant({
+    'active' : IDL.Null,
+    'pending' : IDL.Null,
+    'rent' : IDL.Null,
+    'sold' : IDL.Null,
+    'rejected' : IDL.Null,
+  });
+  const Property = IDL.Record({
+    'id' : IDL.Nat,
+    'status' : ListingStatus,
+    'title' : IDL.Text,
+    'propertyType' : PropertyType,
+    'isLuxury' : IDL.Bool,
+    'owner' : IDL.Principal,
+    'carpetArea' : IDL.Nat,
+    'bhkType' : BhkType,
+    'builtUpArea' : IDL.Nat,
+    'description' : IDL.Text,
+    'amenities' : IDL.Vec(Amenity),
+    'isUnderConstruction' : IDL.Bool,
+    'isFeatured' : IDL.Bool,
+    'hasBalcony' : IDL.Bool,
+    'price' : IDL.Nat,
+    'location' : IDL.Text,
+    'parkingSpaces' : IDL.Nat,
+    'photos' : IDL.Vec(IDL.Vec(IDL.Nat8)),
+    'images' : IDL.Vec(ExternalBlob),
   });
   const AnalyticsSummary = IDL.Record({
     'pendingApprovals' : IDL.Nat,
@@ -346,25 +393,6 @@ export const idlFactory = ({ IDL }) => {
     'timestamp' : IDL.Int,
     'senderName' : IDL.Text,
     'senderEmail' : IDL.Text,
-  });
-  const ExternalBlob = IDL.Vec(IDL.Nat8);
-  const Property = IDL.Record({
-    'id' : IDL.Nat,
-    'status' : ListingStatus,
-    'title' : IDL.Text,
-    'propertyType' : PropertyType,
-    'isLuxury' : IDL.Bool,
-    'owner' : IDL.Principal,
-    'carpetArea' : IDL.Nat,
-    'bhkType' : BhkType,
-    'builtUpArea' : IDL.Nat,
-    'description' : IDL.Text,
-    'amenities' : IDL.Vec(Amenity),
-    'isUnderConstruction' : IDL.Bool,
-    'isFeatured' : IDL.Bool,
-    'price' : IDL.Nat,
-    'location' : IDL.Text,
-    'images' : IDL.Vec(ExternalBlob),
   });
   const Testimonial = IDL.Record({
     'id' : IDL.Nat,
@@ -431,7 +459,6 @@ export const idlFactory = ({ IDL }) => {
     'createProperty' : IDL.Func(
         [
           IDL.Record({
-            'status' : ListingStatus,
             'title' : IDL.Text,
             'propertyType' : PropertyType,
             'isLuxury' : IDL.Bool,
@@ -439,10 +466,15 @@ export const idlFactory = ({ IDL }) => {
             'bhkType' : BhkType,
             'builtUpArea' : IDL.Nat,
             'description' : IDL.Text,
+            'amenities' : IDL.Vec(Amenity),
             'isUnderConstruction' : IDL.Bool,
             'isFeatured' : IDL.Bool,
+            'hasBalcony' : IDL.Bool,
             'price' : IDL.Nat,
             'location' : IDL.Text,
+            'parkingSpaces' : IDL.Nat,
+            'photos' : IDL.Vec(IDL.Vec(IDL.Nat8)),
+            'images' : IDL.Vec(ExternalBlob),
           }),
         ],
         [IDL.Nat],
@@ -460,6 +492,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'deleteProperty' : IDL.Func([IDL.Nat], [], []),
+    'getAllPropertiesAdmin' : IDL.Func([], [IDL.Vec(Property)], ['query']),
     'getAllUsers' : IDL.Func(
         [],
         [
@@ -545,7 +578,6 @@ export const idlFactory = ({ IDL }) => {
         [
           IDL.Nat,
           IDL.Record({
-            'status' : ListingStatus,
             'title' : IDL.Text,
             'propertyType' : PropertyType,
             'isLuxury' : IDL.Bool,
@@ -553,14 +585,20 @@ export const idlFactory = ({ IDL }) => {
             'bhkType' : BhkType,
             'builtUpArea' : IDL.Nat,
             'description' : IDL.Text,
+            'amenities' : IDL.Vec(Amenity),
             'isUnderConstruction' : IDL.Bool,
+            'hasBalcony' : IDL.Bool,
             'price' : IDL.Nat,
             'location' : IDL.Text,
+            'parkingSpaces' : IDL.Nat,
+            'photos' : IDL.Vec(IDL.Vec(IDL.Nat8)),
+            'images' : IDL.Vec(ExternalBlob),
           }),
         ],
         [],
         [],
       ),
+    'updatePropertyStatus' : IDL.Func([IDL.Nat, ListingStatus], [], []),
   });
 };
 

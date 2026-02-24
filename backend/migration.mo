@@ -1,77 +1,82 @@
 import Map "mo:core/Map";
-import Set "mo:core/Set";
 import Nat "mo:core/Nat";
+import Set "mo:core/Set";
+import Blob "mo:core/Blob";
+import Storage "blob-storage/Storage";
 import AccessControl "authorization/access-control";
 import UserApproval "user-approval/approval";
-import Storage "blob-storage/Storage";
 import Principal "mo:core/Principal";
 
 module {
-  type OldRole = {
-    #user;
-    #admin;
-  };
-
-  type OldListingStatus = {
-    #active;
-    #pending;
-    #sold;
-  };
-
-  type OldAmenity = {
+  type ApprovalStatus = UserApproval.ApprovalStatus;
+  type Role = { #user; #admin };
+  type ListingStatus = { #active; #pending; #sold; #rent; #rejected };
+  type Amenity = {
     #parking;
     #gym;
     #swimmingPool;
     #garden;
     #security;
     #playground;
+    #gardenArea;
+    #balcony;
+    #lift;
+    #club;
+    #powerBackup;
   };
-
-  type OldPropertyType = {
-    #apartment;
-    #villa;
-    #rowHouse;
-    #plot;
-    #commercial;
-  };
-
-  type OldBhkType = {
-    #bhk1;
-    #bhk2;
-    #bhk3;
-    #bhk4;
-    #bhk5plus;
-  };
-
-  type OldProperty = {
+  type PropertyType = { #apartment; #villa; #rowHouse; #plot; #commercial };
+  type BhkType = { #bhk1; #bhk2; #bhk3; #bhk4; #bhk5plus };
+  type PropertyOld = {
     id : Nat;
-    owner : Principal.Principal;
+    owner : Principal;
     title : Text;
     description : Text;
     price : Nat;
     location : Text;
-    propertyType : OldPropertyType;
-    bhkType : OldBhkType;
+    propertyType : PropertyType;
+    bhkType : BhkType;
     carpetArea : Nat;
     builtUpArea : Nat;
-    amenities : [OldAmenity];
+    amenities : [Amenity];
     images : [Storage.ExternalBlob];
-    status : OldListingStatus;
+    status : ListingStatus;
     isFeatured : Bool;
     isLuxury : Bool;
     isUnderConstruction : Bool;
+    photos : [Text];
+    hasBalcony : Bool;
+    parkingSpaces : Nat;
   };
-
-  type OldUser = {
-    principal : Principal.Principal;
+  type PropertyNew = {
+    id : Nat;
+    owner : Principal;
+    title : Text;
+    description : Text;
+    price : Nat;
+    location : Text;
+    propertyType : PropertyType;
+    bhkType : BhkType;
+    carpetArea : Nat;
+    builtUpArea : Nat;
+    amenities : [Amenity];
+    images : [Storage.ExternalBlob];
+    status : ListingStatus;
+    isFeatured : Bool;
+    isLuxury : Bool;
+    isUnderConstruction : Bool;
+    photos : [Blob];
+    hasBalcony : Bool;
+    parkingSpaces : Nat;
+  };
+  type User = {
+    principal : Principal;
     name : Text;
     email : Text;
     phone : Text;
-    role : OldRole;
+    role : Role;
     wishlist : Set.Set<Nat>;
   };
-
-  type OldEnquiry = {
+  type Enquiry = {
     id : Nat;
     propertyId : Nat;
     senderName : Text;
@@ -80,8 +85,7 @@ module {
     message : Text;
     timestamp : Int;
   };
-
-  type OldTestimonial = {
+  type Testimonial = {
     id : Nat;
     author : Text;
     quote : Text;
@@ -89,145 +93,41 @@ module {
   };
 
   type OldActor = {
-    userApprovalState : UserApproval.UserApprovalState;
-    accessControlState : AccessControl.AccessControlState;
     propertyIdCounter : Nat;
     enquiryIdCounter : Nat;
     testimonialIdCounter : Nat;
-    users : Map.Map<Principal.Principal, OldUser>;
-    properties : Map.Map<Nat, OldProperty>;
-    enquiries : Map.Map<Nat, OldEnquiry>;
-    testimonials : Map.Map<Nat, OldTestimonial>;
-  };
-
-  type NewRole = {
-    #user;
-    #admin;
-  };
-
-  type NewListingStatus = {
-    #active;
-    #pending;
-    #sold;
-    #rent;
-  };
-
-  type NewAmenity = {
-    #parking;
-    #gym;
-    #swimmingPool;
-    #garden;
-    #security;
-    #playground;
-  };
-
-  type NewPropertyType = {
-    #apartment;
-    #villa;
-    #rowHouse;
-    #plot;
-    #commercial;
-  };
-
-  type NewBhkType = {
-    #bhk1;
-    #bhk2;
-    #bhk3;
-    #bhk4;
-    #bhk5plus;
-  };
-
-  type NewProperty = {
-    id : Nat;
-    owner : Principal.Principal;
-    title : Text;
-    description : Text;
-    price : Nat;
-    location : Text;
-    propertyType : NewPropertyType;
-    bhkType : NewBhkType;
-    carpetArea : Nat;
-    builtUpArea : Nat;
-    amenities : [NewAmenity];
-    images : [Storage.ExternalBlob];
-    status : NewListingStatus;
-    isFeatured : Bool;
-    isLuxury : Bool;
-    isUnderConstruction : Bool;
-  };
-
-  type NewUser = {
-    principal : Principal.Principal;
-    name : Text;
-    email : Text;
-    phone : Text;
-    role : NewRole;
-    wishlist : Set.Set<Nat>;
-  };
-
-  type NewEnquiry = {
-    id : Nat;
-    propertyId : Nat;
-    senderName : Text;
-    senderPhone : Text;
-    senderEmail : Text;
-    message : Text;
-    timestamp : Int;
-  };
-
-  type NewTestimonial = {
-    id : Nat;
-    author : Text;
-    quote : Text;
-    rating : Nat;
+    accessControlState : AccessControl.AccessControlState;
+    userApprovalState : UserApproval.UserApprovalState;
+    users : Map.Map<Principal, User>;
+    properties : Map.Map<Nat, PropertyOld>;
+    enquiries : Map.Map<Nat, Enquiry>;
+    testimonials : Map.Map<Nat, Testimonial>;
   };
 
   type NewActor = {
-    userApprovalState : UserApproval.UserApprovalState;
-    accessControlState : AccessControl.AccessControlState;
     propertyIdCounter : Nat;
     enquiryIdCounter : Nat;
     testimonialIdCounter : Nat;
-    users : Map.Map<Principal.Principal, NewUser>;
-    properties : Map.Map<Nat, NewProperty>;
-    enquiries : Map.Map<Nat, NewEnquiry>;
-    testimonials : Map.Map<Nat, NewTestimonial>;
+    accessControlState : AccessControl.AccessControlState;
+    userApprovalState : UserApproval.UserApprovalState;
+    users : Map.Map<Principal, User>;
+    properties : Map.Map<Nat, PropertyNew>;
+    enquiries : Map.Map<Nat, Enquiry>;
+    testimonials : Map.Map<Nat, Testimonial>;
   };
 
   public func run(old : OldActor) : NewActor {
-    let newProperties = old.properties.map<Nat, OldProperty, NewProperty>(
-      func(_id, prop) {
+    let newProperties = old.properties.map<Nat, PropertyOld, PropertyNew>(
+      func(_id, oldProperty) {
         {
-          id = prop.id;
-          owner = prop.owner;
-          title = prop.title;
-          description = prop.description;
-          price = prop.price;
-          location = prop.location;
-          propertyType = prop.propertyType;
-          bhkType = prop.bhkType;
-          carpetArea = prop.carpetArea;
-          builtUpArea = prop.builtUpArea;
-          amenities = prop.amenities;
-          images = prop.images;
-          status = (prop.status : NewListingStatus); // Add : NewListingStatus to clarify conversion
-          isFeatured = prop.isFeatured;
-          isLuxury = prop.isLuxury;
-          isUnderConstruction = prop.isUnderConstruction;
+          oldProperty with
+          photos = []
         };
       }
     );
-
     {
-      userApprovalState = old.userApprovalState;
-      accessControlState = old.accessControlState;
-      propertyIdCounter = old.propertyIdCounter;
-      enquiryIdCounter = old.enquiryIdCounter;
-      testimonialIdCounter = old.testimonialIdCounter;
-      users = old.users;
+      old with
       properties = newProperties;
-      enquiries = old.enquiries;
-      testimonials = old.testimonials;
     };
   };
 };

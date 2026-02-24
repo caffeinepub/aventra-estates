@@ -12,10 +12,15 @@ import type { Principal } from '@icp-sdk/core/principal';
 
 export type Amenity = { 'gym' : null } |
   { 'swimmingPool' : null } |
+  { 'balcony' : null } |
+  { 'club' : null } |
+  { 'lift' : null } |
   { 'garden' : null } |
   { 'security' : null } |
+  { 'powerBackup' : null } |
   { 'playground' : null } |
-  { 'parking' : null };
+  { 'parking' : null } |
+  { 'gardenArea' : null };
 export interface AnalyticsSummary {
   'pendingApprovals' : bigint,
   'totalProperties' : bigint,
@@ -43,7 +48,8 @@ export type ExternalBlob = Uint8Array;
 export type ListingStatus = { 'active' : null } |
   { 'pending' : null } |
   { 'rent' : null } |
-  { 'sold' : null };
+  { 'sold' : null } |
+  { 'rejected' : null };
 export interface Property {
   'id' : bigint,
   'status' : ListingStatus,
@@ -58,8 +64,11 @@ export interface Property {
   'amenities' : Array<Amenity>,
   'isUnderConstruction' : boolean,
   'isFeatured' : boolean,
+  'hasBalcony' : boolean,
   'price' : bigint,
   'location' : string,
+  'parkingSpaces' : bigint,
+  'photos' : Array<Uint8Array>,
   'images' : Array<ExternalBlob>,
 }
 export type PropertyType = { 'commercial' : null } |
@@ -130,7 +139,6 @@ export interface _SERVICE {
   'createProperty' : ActorMethod<
     [
       {
-        'status' : ListingStatus,
         'title' : string,
         'propertyType' : PropertyType,
         'isLuxury' : boolean,
@@ -138,10 +146,15 @@ export interface _SERVICE {
         'bhkType' : BhkType,
         'builtUpArea' : bigint,
         'description' : string,
+        'amenities' : Array<Amenity>,
         'isUnderConstruction' : boolean,
         'isFeatured' : boolean,
+        'hasBalcony' : boolean,
         'price' : bigint,
         'location' : string,
+        'parkingSpaces' : bigint,
+        'photos' : Array<Uint8Array>,
+        'images' : Array<ExternalBlob>,
       },
     ],
     bigint
@@ -151,6 +164,7 @@ export interface _SERVICE {
     bigint
   >,
   'deleteProperty' : ActorMethod<[bigint], undefined>,
+  'getAllPropertiesAdmin' : ActorMethod<[], Array<Property>>,
   'getAllUsers' : ActorMethod<
     [],
     Array<
@@ -200,7 +214,6 @@ export interface _SERVICE {
     [
       bigint,
       {
-        'status' : ListingStatus,
         'title' : string,
         'propertyType' : PropertyType,
         'isLuxury' : boolean,
@@ -208,13 +221,19 @@ export interface _SERVICE {
         'bhkType' : BhkType,
         'builtUpArea' : bigint,
         'description' : string,
+        'amenities' : Array<Amenity>,
         'isUnderConstruction' : boolean,
+        'hasBalcony' : boolean,
         'price' : bigint,
         'location' : string,
+        'parkingSpaces' : bigint,
+        'photos' : Array<Uint8Array>,
+        'images' : Array<ExternalBlob>,
       },
     ],
     undefined
   >,
+  'updatePropertyStatus' : ActorMethod<[bigint, ListingStatus], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

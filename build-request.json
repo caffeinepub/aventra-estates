@@ -1,62 +1,98 @@
 {
   "kind": "build_request",
-  "title": "Add Rent Property support and integrate official contact information",
+  "title": "Replace photo URL inputs with JPEG file upload inputs for property photos",
   "projectName": "Aventra Estates",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-10",
-      "text": "Add a dedicated 'Rent' property category throughout the application. The Search Bar on the homepage already has a 'Rent' tab — ensure it correctly filters and navigates to the property listing page showing only rental listings. Add 'For Rent' as a valid listing type/status in the backend data model alongside existing statuses. Allow users to post properties listed as 'For Rent' via the Post Property multi-step form by including a 'Listing Type' field (Buy / Rent). Display a 'For Rent' badge on property cards and detail pages for rental listings.",
-      "target": "both",
+      "id": "REQ-19",
+      "text": "Update the backend Property data model to store photos as base64-encoded JPEG blobs (or stable binary blobs) instead of URL strings. Change the 'photos' field type from [Text] to [Blob] or a record containing filename and blob data. Update createProperty, updateProperty, and getPropertyById to accept and return photo blob data accordingly.",
+      "target": "backend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "Please add rent property"
+          "Remove photo url and add photo with jpeg"
         ]
       },
       "acceptanceCriteria": [
-        "Backend Property type includes a listingType field with values: 'sale' | 'rent'",
-        "Post Property form includes a Listing Type selector (Buy / Rent) in the Basic Info step",
-        "Searching with the 'Rent' tab on the homepage search bar navigates to the listing page pre-filtered for rental properties",
-        "Property listing page sidebar filters include a 'Listing Type' filter (All / For Sale / For Rent)",
-        "Property cards display a 'For Rent' badge when listingType is 'rent'",
-        "Property detail page shows the listing type prominently (e.g., 'For Rent' label near the price)"
+        "The Property type in main.mo no longer contains a plain URL string array for photos",
+        "The photos field accepts JPEG binary/blob data",
+        "createProperty and updateProperty backend methods accept photo blobs",
+        "getPropertyById returns photo blob data that can be rendered as images on the frontend"
       ]
     },
     {
-      "id": "REQ-11",
-      "text": "Update all site-wide contact information to reflect the official Aventra Estates details: phone numbers +917020271267 and +919535511171, email aventraestate@gmail.com, and office address 'Near Goodluck Apartment, Kondhwa, Pune 411048'. This information must appear in the Footer component and on any Contact / About section. WhatsApp quick-contact links should use +917020271267 as the default number.",
+      "id": "REQ-20",
+      "text": "In PostPropertyPage (Features & Photos step), remove all photo URL text input fields and replace them with a file upload input that accepts JPEG image files (accept='image/jpeg,image/jpg'). Allow uploading multiple files. Read uploaded files as binary data (e.g., via FileReader as ArrayBuffer or base64) and store them in component state for submission. Display thumbnail previews of selected images before submission.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "Contact number +917020271267 +919535511171",
-          "Gmail - aventraestate@gmail.com",
-          "Office address near goodluck apartment kondhwa pune 411048"
+          "Remove photo url and add photo with jpeg"
         ]
       },
       "acceptanceCriteria": [
-        "Footer displays both phone numbers: +917020271267 and +919535511171",
-        "Footer displays email address aventraestate@gmail.com as a clickable mailto link",
-        "Footer displays office address: Near Goodluck Apartment, Kondhwa, Pune 411048",
-        "WhatsApp floating/CTA links use +917020271267 as the default contact number",
-        "Agent card default contact info (if no agent is assigned) falls back to the official contact numbers and email"
+        "No photo URL text input fields exist in PostPropertyPage",
+        "A file input with accept='image/jpeg,image/jpg' is present in the Features & Photos step",
+        "Multiple JPEG files can be selected at once",
+        "Thumbnail previews of selected photos are shown before submission",
+        "Selected photo data is submitted with the property form data"
+      ]
+    },
+    {
+      "id": "REQ-21",
+      "text": "In EditPropertyPage, remove all photo URL text input fields and replace them with a JPEG file upload input (accept='image/jpeg,image/jpg'). Pre-populate the photo preview area with existing photos from the property data. Allow the user to upload new JPEG files to replace or add to existing photos. Display thumbnail previews of both existing and newly selected photos.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Remove photo url and add photo with jpeg"
+        ]
+      },
+      "acceptanceCriteria": [
+        "No photo URL text input fields exist in EditPropertyPage",
+        "A JPEG file upload input is present",
+        "Existing property photos are shown as thumbnails when the edit form loads",
+        "New JPEG files can be selected and previewed before saving",
+        "Updated photo data is submitted correctly on form save"
+      ]
+    },
+    {
+      "id": "REQ-22",
+      "text": "Update PropertyCard, PropertyListingPage, PropertyDetailPage (ImageGallerySlider), and any other component that renders property photos to handle the new blob/base64 photo format. Convert stored photo blob data to object URLs or base64 data URIs for rendering in <img> tags. Ensure backward compatibility where no photos exist (show a placeholder image).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Remove photo url and add photo with jpeg"
+        ]
+      },
+      "acceptanceCriteria": [
+        "PropertyCard renders uploaded JPEG photos correctly using blob/base64 data",
+        "ImageGallerySlider on PropertyDetailPage renders all uploaded JPEG photos",
+        "No broken image icons appear for properties with uploaded photos",
+        "Properties without any photos show a fallback placeholder image"
       ]
     }
   ],
   "constraints": [
-    "Do not break existing property listing, filtering, or admin approval flows",
-    "Immutable frontend paths (hooks, main.tsx, ui components) must not be modified",
-    "All contact details must match exactly: +917020271267, +919535511171, aventraestate@gmail.com, Near Goodluck Apartment Kondhwa Pune 411048"
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
+    "All Motoko logic must remain in the single main actor in backend/main.mo",
+    "Only generate backend/migration.mo if the backend state schema upgrade requires data migration"
   ],
   "nonGoals": [
-    "Building a separate standalone Rent page — rental listings should be handled within the existing Property Listing Page via filters",
-    "Adding new authentication or user role changes",
-    "Modifying the admin panel approval workflow"
+    "Supporting image formats other than JPEG/JPG",
+    "Cloud storage or CDN integration for photos",
+    "Video file uploads",
+    "Changing any other property fields beyond the photos field"
   ],
   "imageRequirements": {
     "required": [],
